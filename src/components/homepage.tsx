@@ -64,7 +64,7 @@ export const Homepage: React.FC = () => {
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <motion.a 
-                  href="#getting-started" 
+                  href="/login" 
                   className="bg-sky-700 hover:bg-sky-500 text-white py-3 px-6 rounded-lg font-medium text-center transition duration-300"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
