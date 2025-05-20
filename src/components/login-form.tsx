@@ -1,14 +1,16 @@
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import Link from 'next/link';
-import { GoogleClientButton } from './clt-btn';
+import Image from "next/image"
+import Link from "next/link"
+
+import { cn } from "@/lib/utils"
+
+import { GoogleClientButton } from "./clt-btn"
 
 export function LoginForm({
   className,
   ...props
-}: React.ComponentProps<'div'>) {
+}: React.ComponentProps<"div">) {
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
@@ -37,5 +39,5 @@ export function LoginForm({
         <Link href="/privacy">Privacy Policy</Link>.
       </div>
     </div>
-  );
+  )
 }

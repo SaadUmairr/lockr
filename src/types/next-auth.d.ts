@@ -1,22 +1,22 @@
-import 'next-auth';
+import "next-auth"
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
-      name: string;
-      email: string;
-      image: string;
-      googleID: string; // ✅ Add this!
-    };
+      name: string
+      email: string
+      image: string
+      googleID: string // ✅ Add this!
+    }
   }
 
   interface User {
-    googleID: string;
+    googleID: string
   }
 }
 
-declare module 'next-auth/jwt' {
+declare module "next-auth/jwt" {
   interface JWT {
-    googleID: string;
+    googleID: string
   }
 }

@@ -1,5 +1,5 @@
-import { TOSPage } from '@/components/tos';
+import { TOSPage } from "@/components/tos"
 
 export default function TOS() {
-  return <TOSPage />;
+  return <TOSPage />
 }

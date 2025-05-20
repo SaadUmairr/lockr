@@ -1,64 +1,61 @@
-'use client';
+"use client"
 
-import { useIsMobile } from '@/hooks/use-mobile';
-import { motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import Github from '../../public/github.svg';
-import ThemeToggler from './theme-toggle';
-import { Button } from './ui/button';
+import { useEffect, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { Menu, X } from "lucide-react"
+import { motion } from "motion/react"
+
+import { useIsMobile } from "@/hooks/use-mobile"
+
+import Github from "../../public/github.svg"
+import ThemeToggler from "./theme-toggle"
+import { Button } from "./ui/button"
 
 type NavLinkProps = {
-  href: string;
-  children: React.ReactNode;
-  external?: boolean;
-};
+  href: string
+  children: React.ReactNode
+  external?: boolean
+}
 
 const NavLink: React.FC<NavLinkProps> = ({
   href,
   children,
   external = false,
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   return (
     <Link
       href={href}
-      className={`${isDark ? 'text-slate-300 hover:text-slate-50' : 'text-slate-700 hover:text-slate-900'} transition duration-300`}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
+      className="text-slate-700 transition duration-300 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-50"
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
     >
       <motion.span
         whileHover={{ y: -2 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        transition={{ type: "spring", stiffness: 400, damping: 10 }}
         className="flex items-center space-x-1"
       >
         {children}
       </motion.span>
     </Link>
-  );
-};
+  )
+}
 
 const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const isMobile = useIsMobile();
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const isMobile = useIsMobile()
 
   // Close mobile menu on resize to desktop
   useEffect(() => {
     if (!isMobile && isOpen) {
-      setIsOpen(false);
+      setIsOpen(false)
     }
-  }, [isMobile, isOpen]);
+  }, [isMobile, isOpen])
 
   return (
     <motion.nav
-      className={`${isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'} border-b py-4 text-slate-900`}
+      className="border-b border-slate-200 bg-white py-4 text-slate-900 dark:border-slate-800 dark:bg-slate-900"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -68,12 +65,10 @@ const Navbar: React.FC = () => {
           <motion.div
             className="flex items-center space-x-2"
             whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Image src="/key96.svg" alt="KEY" width={24} height={24} />
-            <span
-              className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}
-            >
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
               lockr
             </span>
           </motion.div>
@@ -95,7 +90,7 @@ const Navbar: React.FC = () => {
               />
               <span>GitHub</span>
             </NavLink>
-            <Button onClick={() => (window.location.href = '/login')}>
+            <Button className="bg-sky-500" onClick={() => redirect("/login")}>
               Go to App
             </Button>
           </div>
@@ -107,16 +102,12 @@ const Navbar: React.FC = () => {
             className="focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
             whileTap={{ scale: 0.95 }}
-            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             {isOpen ? (
-              <X
-                className={`h-6 w-6 ${isDark ? 'text-white' : 'text-slate-900'}`}
-              />
+              <X className="h-6 w-6 text-slate-600 dark:text-white" />
             ) : (
-              <Menu
-                className={`h-6 w-6 ${isDark ? 'text-white' : 'text-slate-900'}`}
-              />
+              <Menu className="h-6 w-6 text-slate-600 dark:text-white" />
             )}
           </motion.button>
         )}
@@ -125,9 +116,9 @@ const Navbar: React.FC = () => {
       {/* Mobile Navigation */}
       {isMobile && isOpen && (
         <motion.div
-          className={`${isDark ? 'bg-slate-800' : 'bg-slate-100'} py-2`}
+          className="bg-slate-100 py-2 dark:bg-slate-800"
           initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
+          animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
         >
@@ -154,7 +145,7 @@ const Navbar: React.FC = () => {
         </motion.div>
       )}
     </motion.nav>
-  );
-};
+  )
+}
 
-export { Navbar };
+export { Navbar }

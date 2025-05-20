@@ -1,68 +1,75 @@
-'use client';
+"use client"
 
-import { Button } from '@/components/ui/button';
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { LogoutHandler } from "@/actions/user"
+import { useData } from "@/context/data.context"
+import { saveSpaces } from "@/utils/idb.util"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+  AlignRight,
+  ArrowDown01Icon,
+  ArrowDownAZIcon,
+  ArrowUpDownIcon,
+  InfoIcon,
+  LogOutIcon,
+  MenuIcon,
+  MoonStar,
+  PlusIcon,
+} from "lucide-react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import ThemeToggler from '@/components/theme-toggle';
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Button } from "@/components/ui/button"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { useData } from '@/context/data.context';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { saveSpaces } from '@/utils/idb.util';
-import { zodResolver } from '@hookform/resolvers/zod';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
-    AlignRight,
-    ArrowDown01Icon,
-    ArrowDownAZIcon,
-    ArrowUpDownIcon,
-    InfoIcon,
-    MenuIcon,
-    MoonStar,
-    PlusIcon,
-} from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import ThemeToggler from "@/components/theme-toggle"
 
 const formSchema = z.object({
   space: z.string().min(2, {
-    message: 'Space must be at least 2 characters',
+    message: "Space must be at least 2 characters",
   }),
-});
+})
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>
 
 export function Navbar() {
   const {
@@ -74,40 +81,38 @@ export function Navbar() {
     setSortAlphabatically,
     sortByCreation,
     setSortByCreation,
-  } = useData();
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  } = useData()
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      space: 'main',
+      space: "main",
     },
-  });
+  })
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile()
 
   const createNewSpace = async (values: FormData): Promise<void> => {
-    if (loading) return;
-    setLoading(true);
+    if (loading) return
+    setLoading(true)
 
-    const newSpace = values.space.trim();
+    const newSpace = values.space.trim()
 
-    const exists = space.some(
-      (s) => s.toLowerCase() === newSpace.toLowerCase(),
-    );
+    const exists = space.some((s) => s.toLowerCase() === newSpace.toLowerCase())
     if (exists) {
-      form.setError('space', { message: 'Space already exists' });
-      setLoading(false);
-      return;
+      form.setError("space", { message: "Space already exists" })
+      setLoading(false)
+      return
     }
 
-    const updated = [...space, newSpace];
-    setSpace(updated);
-    await saveSpaces(updated);
-    setLoading(false);
-    setDialogOpen(false);
-  };
+    const updated = [...space, newSpace]
+    setSpace(updated)
+    await saveSpaces(updated)
+    setLoading(false)
+    setDialogOpen(false)
+  }
 
   return (
     <div className="mb-3 flex items-center justify-between rounded-xl border-b border-gray-200 bg-white px-4 py-3 shadow-sm transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900">
@@ -192,7 +197,22 @@ export function Navbar() {
           </Popover>
         )}
 
-        <ThemeToggler />
+        <div className="ml-2">
+          <ThemeToggler />
+        </div>
+
+        {!isMobile && (
+          <Button
+            className="mx-2"
+            variant="ghost"
+            onClick={async () => {
+              await LogoutHandler()
+              return redirect("/")
+            }}
+          >
+            <LogOutIcon />
+          </Button>
+        )}
 
         {isMobile && (
           <DropdownMenu>
@@ -247,6 +267,16 @@ export function Navbar() {
                   {sortAlphabatically && <MoonStar />}
                 </Button>
               </div>
+              <Button
+                className="mx-2 w-full justify-start"
+                variant="ghost"
+                onClick={async () => {
+                  await LogoutHandler()
+                  return redirect("/")
+                }}
+              >
+                <LogOutIcon className="mr-2 h-4 w-4" /> Log out
+              </Button>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -324,5 +354,5 @@ export function Navbar() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }

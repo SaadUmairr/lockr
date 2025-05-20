@@ -1,7 +1,21 @@
-'use client';
+"use client"
 
-import { SaveCredentials } from '@/actions/user';
-import { Button } from '@/components/ui/button';
+import { useCallback, useState } from "react"
+import { SaveCredentials } from "@/actions/user"
+import { useData } from "@/context/data.context"
+import { useKey } from "@/context/key.context"
+import { useUser } from "@/context/user.context"
+import { Encryptor } from "@/utils/crypto.util"
+import { appendLocalPassword } from "@/utils/idb.util"
+import { generateStrongPassword } from "@/utils/password.util"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { AnimatePresence, motion } from "framer-motion"
+import { Eye, EyeOff, Plus, WandSparklesIcon, X } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { z } from "zod"
+
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -11,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -19,24 +33,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { useData } from '@/context/data.context';
-import { useKey } from '@/context/key.context';
-import { useUser } from '@/context/user.context';
-import { Encryptor } from '@/utils/crypto.util';
-import { generateStrongPassword } from '@/utils/password.util';
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
 
-import { appendLocalPassword } from '@/utils/idb.util';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Eye, EyeOff, Plus, WandSparklesIcon, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-import { PasswordDataProp } from './main';
+import { PasswordDataProp } from "./main"
 import {
   Select,
   SelectContent,
@@ -44,116 +45,116 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from "./ui/select"
 
 interface EncryptedCredentials {
-  encrypted_username: string;
-  encrypted_password: string;
-  encrypted_website?: string;
-  iv: string;
+  encrypted_username: string
+  encrypted_password: string
+  encrypted_website?: string
+  iv: string
 }
 
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/
 
 const formSchema = z.object({
-  website: z.string().optional().or(z.literal('')),
+  website: z.string().optional().or(z.literal("")),
   username: z.string().min(2, {
-    message: 'Username must be at least 2 characters',
+    message: "Username must be at least 2 characters",
   }),
   password: z
     .string()
     .min(6, {
-      message: 'Password must be atleast 6 characters',
+      message: "Password must be atleast 6 characters",
     })
     .regex(passwordRegex, {
       message:
-        'Password must contain uppercase, lowercase, number, and special character',
+        "Password must contain uppercase, lowercase, number, and special character",
     }),
-});
+})
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>
 
 // Password length options
-const passwordLengths = [16, 32, 48, 64, 80, 96, 112, 128];
+const passwordLengths = [16, 32, 48, 64, 80, 96, 112, 128]
 
 export function CredInput() {
-  const { key } = useKey();
-  const { googleID } = useUser();
-  const { space, selectedSpace, setSelectedSpace, setPwdFields } = useData();
+  const { key } = useKey()
+  const { googleID } = useUser()
+  const { space, selectedSpace, setSelectedSpace, setPwdFields } = useData()
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-  const [inputDialogOen, setInputDialogOpen] = useState<boolean>(false);
-  const [passwordLength, setPasswordLength] = useState<number>(24);
-  const [showStrengthSlider, setShowStrengthSlider] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false)
+  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
+  const [inputDialogOen, setInputDialogOpen] = useState<boolean>(false)
+  const [passwordLength, setPasswordLength] = useState<number>(24)
+  const [showStrengthSlider, setShowStrengthSlider] = useState<boolean>(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      website: '',
-      username: '',
-      password: '',
+      website: "",
+      username: "",
+      password: "",
     },
-  });
+  })
 
   const onSubmit = async (values: FormData): Promise<void> => {
-    if (loading) return;
+    if (loading) return
     if (!key) {
-      toast.error('Encryption key is missing');
-      return;
+      toast.error("Encryption key is missing")
+      return
     }
-    setLoading(true);
-    const submitToast = toast.loading('Saving...');
+    setLoading(true)
+    const submitToast = toast.loading("Saving...")
     try {
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const encryptedResult: Partial<EncryptedCredentials> = {};
+      const iv = crypto.getRandomValues(new Uint8Array(12))
+      const encryptedResult: Partial<EncryptedCredentials> = {}
 
-      let ivBase64 = '';
+      let ivBase64 = ""
 
       const fieldsToEncrypt: Record<string, string | null | undefined> = {
         username: values.username,
         password: values.password,
         website: values.website,
-      };
+      }
 
       for (const [field, value] of Object.entries(fieldsToEncrypt)) {
-        if (!value || value.trim() === '') continue;
+        if (!value || value.trim() === "") continue
 
         const { encryptedBase64, ivBase64: currentIV } = await Encryptor(
           value,
           key,
-          iv,
-        );
+          iv
+        )
 
-        if (field === 'username')
-          encryptedResult.encrypted_username = encryptedBase64;
-        else if (field === 'password')
-          encryptedResult.encrypted_password = encryptedBase64;
-        else if (field === 'website')
-          encryptedResult.encrypted_website = encryptedBase64 ?? null;
+        if (field === "username")
+          encryptedResult.encrypted_username = encryptedBase64
+        else if (field === "password")
+          encryptedResult.encrypted_password = encryptedBase64
+        else if (field === "website")
+          encryptedResult.encrypted_website = encryptedBase64 ?? null
 
-        if (!ivBase64) ivBase64 = currentIV;
+        if (!ivBase64) ivBase64 = currentIV
       }
 
-      encryptedResult.iv = ivBase64;
+      encryptedResult.iv = ivBase64
 
       if (
         !encryptedResult.encrypted_username ||
         !encryptedResult.encrypted_password ||
         !encryptedResult.iv
       ) {
-        toast.error('Encryption failed. Required fields missing.');
-        return;
+        toast.error("Encryption failed. Required fields missing.")
+        return
       }
 
       const dbResponse = await SaveCredentials({
         userId: googleID,
-        space: selectedSpace === 'all' ? 'main' : selectedSpace,
+        space: selectedSpace === "all" ? "main" : selectedSpace,
         website: encryptedResult.encrypted_website ?? null,
         username: encryptedResult.encrypted_username,
         password: encryptedResult.encrypted_password,
         iv: encryptedResult.iv,
-      });
+      })
       // Updating UI
       setPwdFields((prev) => [
         ...prev,
@@ -167,8 +168,8 @@ export function CredInput() {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ]);
-      console.log('DB RESPONSE: ', dbResponse);
+      ])
+      console.log("DB RESPONSE: ", dbResponse)
       await appendLocalPassword({
         id: dbResponse.id,
         space: dbResponse.space,
@@ -178,41 +179,41 @@ export function CredInput() {
         iv: dbResponse.iv,
         createdAt: dbResponse.createdAt,
         updatedAt: dbResponse.updatedAt,
-      } as PasswordDataProp);
+      } as PasswordDataProp)
 
-      form.reset();
-      setInputDialogOpen(false);
-      toast.success('Credentials Saved', { id: submitToast });
+      form.reset()
+      setInputDialogOpen(false)
+      toast.success("Credentials Saved", { id: submitToast })
     } catch (error) {
-      console.error(error);
-      toast.error(`OOPS SOMETHING WENT WRONG`, { id: submitToast });
+      console.error(error)
+      toast.error(`OOPS SOMETHING WENT WRONG`, { id: submitToast })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handlePasswordLengthChange = (newValue: number[]) => {
-    const newLength = newValue[0];
+    const newLength = newValue[0]
     // Find the closest value from passwordLengths
     const closestLength = passwordLengths.reduce((prev, curr) =>
-      Math.abs(curr - newLength) < Math.abs(prev - newLength) ? curr : prev,
-    );
-    setPasswordLength(closestLength);
-  };
+      Math.abs(curr - newLength) < Math.abs(prev - newLength) ? curr : prev
+    )
+    setPasswordLength(closestLength)
+  }
 
   const generatePassword = useCallback(() => {
-    const password = generateStrongPassword(passwordLength);
-    form.setValue('password', password);
-    setPasswordVisible(true);
-  }, [passwordLength, form, passwordLength]);
+    const password = generateStrongPassword(passwordLength)
+    form.setValue("password", password)
+    setPasswordVisible(true)
+  }, [passwordLength, form, passwordLength])
 
   const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
-  };
+    setPasswordVisible(!passwordVisible)
+  }
 
   const toggleStrengthSlider = () => {
-    setShowStrengthSlider(!showStrengthSlider);
-  };
+    setShowStrengthSlider(!showStrengthSlider)
+  }
 
   return (
     <>
@@ -288,7 +289,7 @@ export function CredInput() {
                           <div className="relative">
                             <Input
                               placeholder="Enter a strong password"
-                              type={passwordVisible ? 'text' : 'password'}
+                              type={passwordVisible ? "text" : "password"}
                               {...field}
                             />
                             <Button
@@ -346,7 +347,7 @@ export function CredInput() {
                   </Select>
                   <Button
                     type="button"
-                    variant={showStrengthSlider ? 'destructive' : 'outline'}
+                    variant={showStrengthSlider ? "destructive" : "outline"}
                     onClick={toggleStrengthSlider}
                     size="sm"
                     className="px-2 text-xs whitespace-nowrap"
@@ -357,7 +358,7 @@ export function CredInput() {
                         CLOSE
                       </>
                     ) : (
-                      'PASSWORD STRENGTH'
+                      "PASSWORD STRENGTH"
                     )}
                   </Button>
                 </div>
@@ -368,7 +369,7 @@ export function CredInput() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{
                         opacity: 1,
-                        height: 'auto',
+                        height: "auto",
                       }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
@@ -396,7 +397,7 @@ export function CredInput() {
                                 ((length - passwordLengths[0]) /
                                   (passwordLengths[passwordLengths.length - 1] -
                                     passwordLengths[0])) *
-                                100;
+                                100
 
                               return (
                                 <div
@@ -409,7 +410,7 @@ export function CredInput() {
                                   <div className="h-1 w-0.5 bg-gray-300"></div>
                                   <div className="mt-1 text-xs">{length}</div>
                                 </div>
-                              );
+                              )
                             })}
                           </div>
                         </div>
@@ -455,5 +456,5 @@ export function CredInput() {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }

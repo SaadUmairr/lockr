@@ -1,5 +1,5 @@
-import { Footer } from './footer';
-import { Navbar } from './navbar';
+import { Footer } from "./footer"
+import { Navbar } from "./navbar"
 
 export function PrivacyPage() {
   return (
@@ -8,5 +8,5 @@ export function PrivacyPage() {
       <p className="h-screen w-full p-4">WORKING ON IT</p>
       <Footer />
     </>
-  );
+  )
 }

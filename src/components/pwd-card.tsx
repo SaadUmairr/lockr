@@ -1,23 +1,6 @@
-'use client';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+"use client"
 
+import { useState } from "react"
 import {
   Copy,
   Edit,
@@ -26,15 +9,34 @@ import {
   EyeOff,
   MoreVertical,
   Trash2,
-} from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { PasswordDataProp } from './main';
-import { Badge } from './ui/badge';
+} from "lucide-react"
+import { toast } from "sonner"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+import { PasswordDataProp } from "./main"
+import { Badge } from "./ui/badge"
 
 interface PasswordCardProp extends PasswordDataProp {
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
 export function PasswordCard({
@@ -46,71 +48,71 @@ export function PasswordCard({
   onEdit,
   onDelete,
 }: PasswordCardProp) {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false)
   // const [editDialog, setEditDialog] = useState<boolean>(false);
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
-      await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard`);
+      await navigator.clipboard.writeText(text)
+      toast.success(`${label} copied to clipboard`)
     } catch {
-      toast.error(`Failed to copy ${label}`);
+      toast.error(`Failed to copy ${label}`)
     }
-  };
+  }
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword(!showPassword)
     if (!showPassword) {
-      copyToClipboard(password, 'Password');
+      copyToClipboard(password, "Password")
     }
-  };
+  }
 
   const getInitial = () => {
-    return username ? username.charAt(0).toUpperCase() : '?';
-  };
+    return username ? username.charAt(0).toUpperCase() : "?"
+  }
 
   const getFaviconUrl = (): string | null => {
-    if (!website) return null;
+    if (!website) return null
     try {
       // Ensure protocol exists for URL constructor
-      const prefixedWebsite = website.startsWith('http')
+      const prefixedWebsite = website.startsWith("http")
         ? website
-        : `https://${website}`;
-      const url = new URL(prefixedWebsite);
-      return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`;
+        : `https://${website}`
+      const url = new URL(prefixedWebsite)
+      return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`
     } catch (e) {
-      console.error('Error creating URL for favicon:', e);
-      return null;
+      console.error("Error creating URL for favicon:", e)
+      return null
     }
-  };
+  }
 
-  const faviconUrl = getFaviconUrl();
+  const faviconUrl = getFaviconUrl()
 
   const getDomain = () => {
-    if (!website) return '—';
+    if (!website) return "—"
     try {
-      const prefixedWebsite = website.startsWith('http')
+      const prefixedWebsite = website.startsWith("http")
         ? website
-        : `https://${website}`;
-      const url = new URL(prefixedWebsite);
-      return url.hostname.replace(/^www\./, '');
+        : `https://${website}`
+      const url = new URL(prefixedWebsite)
+      return url.hostname.replace(/^www\./, "")
     } catch {
       return website
-        .replace(/^https?:\/\//, '')
-        .split('/')[0]
-        .replace(/^www\./, '');
+        .replace(/^https?:\/\//, "")
+        .split("/")[0]
+        .replace(/^www\./, "")
     }
-  };
+  }
 
   const visitWebsite = () => {
-    if (!website) return;
+    if (!website) return
     window.open(
-      website.startsWith('http') ? website : `https://${website}`,
-      '_blank',
-      'noopener noreferrer',
-    );
-  };
+      website.startsWith("http") ? website : `https://${website}`,
+      "_blank",
+      "noopener noreferrer"
+    )
+  }
 
   return (
     <>
@@ -142,7 +144,7 @@ export function PasswordCard({
                 <button
                   title={`Copy username: ${username}`}
                   className="flex min-w-0 items-center gap-1 text-left text-xs text-gray-500 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
-                  onClick={() => copyToClipboard(username, 'Username')}
+                  onClick={() => copyToClipboard(username, "Username")}
                 >
                   <span className="truncate">{username}</span>
                   <Copy className="h-2.5 w-2.5 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-70" />
@@ -167,7 +169,7 @@ export function PasswordCard({
                   <DropdownMenuItem
                     // onClick={() => onEdit?.(id)}
                     onClick={() => {
-                      toast('👨🏻‍💻 WORK IN PROGRESS');
+                      toast("👨🏻‍💻 WORK IN PROGRESS")
                     }}
                     className="cursor-pointer"
                     disabled={!onEdit}
@@ -199,7 +201,7 @@ export function PasswordCard({
                   onClick={togglePasswordVisibility}
                 >
                   <div className="max-w-[calc(100%-20px)] truncate overflow-hidden text-left">
-                    {showPassword ? password : '••••••••••••'}
+                    {showPassword ? password : "••••••••••••"}
                   </div>
 
                   {showPassword ? (
@@ -214,7 +216,7 @@ export function PasswordCard({
                 size="icon"
                 title="Copy password"
                 className="h-8 w-8 flex-shrink-0 border border-gray-200 bg-gray-50 hover:bg-gray-100 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-                onClick={() => copyToClipboard(password, 'Password')}
+                onClick={() => copyToClipboard(password, "Password")}
               >
                 <Copy className="h-3.5 w-3.5 text-gray-700 dark:text-gray-300" />
               </Button>
@@ -243,5 +245,5 @@ export function PasswordCard({
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }

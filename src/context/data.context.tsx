@@ -1,8 +1,5 @@
-'use client';
+"use client"
 
-import { GetSpaces } from '@/actions/user';
-import { PasswordDataProp } from '@/components/main';
-import { loadSpaces, saveSpaces } from '@/utils/idb.util';
 import {
   createContext,
   Dispatch,
@@ -11,55 +8,60 @@ import {
   useContext,
   useEffect,
   useState,
-} from 'react';
-import { useUser } from './user.context';
+} from "react"
+import { GetSpaces } from "@/actions/user"
+import { loadSpaces, saveSpaces } from "@/utils/idb.util"
+
+import { PasswordDataProp } from "@/components/main"
+
+import { useUser } from "./user.context"
 
 interface DataContextProp {
-  space: string[];
-  setSpace: Dispatch<SetStateAction<string[]>>;
-  selectedSpace: string;
-  setSelectedSpace: Dispatch<SetStateAction<string>>;
-  pwdFields: PasswordDataProp[];
-  setPwdFields: Dispatch<SetStateAction<PasswordDataProp[]>>;
-  sortByCreation: boolean;
-  setSortByCreation: Dispatch<SetStateAction<boolean>>;
-  sortAlphabatically: boolean;
-  setSortAlphabatically: Dispatch<SetStateAction<boolean>>;
+  space: string[]
+  setSpace: Dispatch<SetStateAction<string[]>>
+  selectedSpace: string
+  setSelectedSpace: Dispatch<SetStateAction<string>>
+  pwdFields: PasswordDataProp[]
+  setPwdFields: Dispatch<SetStateAction<PasswordDataProp[]>>
+  sortByCreation: boolean
+  setSortByCreation: Dispatch<SetStateAction<boolean>>
+  sortAlphabatically: boolean
+  setSortAlphabatically: Dispatch<SetStateAction<boolean>>
 }
 
-const DataContext = createContext<DataContextProp | null>(null);
+const DataContext = createContext<DataContextProp | null>(null)
 
 export function DataContextProvider({ children }: { children: ReactNode }) {
-  const { googleID } = useUser();
-  const [space, setSpace] = useState<string[]>(['main']);
-  const [selectedSpace, setSelectedSpace] = useState<string>('main');
+  const { googleID } = useUser()
+  const [space, setSpace] = useState<string[]>(["main"])
+  const [selectedSpace, setSelectedSpace] = useState<string>("main")
 
-  const [sortByCreation, setSortByCreation] = useState<boolean>(false);
-  const [sortAlphabatically, setSortAlphabatically] = useState<boolean>(false);
+  const [sortByCreation, setSortByCreation] = useState<boolean>(false)
+  const [sortAlphabatically, setSortAlphabatically] = useState<boolean>(false)
 
-  const [pwdFields, setPwdFields] = useState<PasswordDataProp[]>([]);
+  const [pwdFields, setPwdFields] = useState<PasswordDataProp[]>([])
 
   useEffect(() => {
-    (async () => {
-      const localSpace = await loadSpaces();
+    ;(async () => {
+      const localSpace = await loadSpaces()
       if (localSpace && localSpace.length > 0) {
-        setSpace(localSpace);
-        return;
+        setSpace(localSpace)
+        return
       }
 
       if (googleID) {
-        const remoteSpace = await GetSpaces(googleID);
+        const remoteSpace = await GetSpaces(googleID)
         if (remoteSpace && remoteSpace.length > 0) {
-          setSpace(remoteSpace);
+          setSpace(remoteSpace)
 
-          await saveSpaces(remoteSpace);
-          return;
+          await saveSpaces(remoteSpace)
+          return
         }
       }
 
-      setSpace(['main']);
-    })();
-  }, [googleID]);
+      setSpace(["main"])
+    })()
+  }, [googleID])
 
   return (
     <DataContext.Provider
@@ -78,12 +80,12 @@ export function DataContextProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </DataContext.Provider>
-  );
+  )
 }
 
 export const useData = (): DataContextProp => {
-  const context = useContext(DataContext);
+  const context = useContext(DataContext)
   if (!context)
-    throw new Error('useData must be used within a DataContextProvider');
-  return context;
-};
+    throw new Error("useData must be used within a DataContextProvider")
+  return context
+}
