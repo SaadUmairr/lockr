@@ -34,7 +34,7 @@ export function LoginForm({
         </div>
       </form>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our
+        By clicking continue, you agree to our &nbsp;
         <Link href="/tos">Terms of Service</Link> and &nbsp;
         <Link href="/privacy">Privacy Policy</Link>.
       </div>
