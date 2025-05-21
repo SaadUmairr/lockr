@@ -169,7 +169,6 @@ export function CredInput() {
           updatedAt: new Date(),
         },
       ])
-      console.log("DB RESPONSE: ", dbResponse)
       await appendLocalPassword({
         id: dbResponse.id,
         space: dbResponse.space,
@@ -184,8 +183,7 @@ export function CredInput() {
       form.reset()
       setInputDialogOpen(false)
       toast.success("Credentials Saved", { id: submitToast })
-    } catch (error) {
-      console.error(error)
+    } catch {
       toast.error(`OOPS SOMETHING WENT WRONG`, { id: submitToast })
     } finally {
       setLoading(false)

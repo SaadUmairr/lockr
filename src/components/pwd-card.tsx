@@ -116,7 +116,7 @@ export function PasswordCard({
 
   return (
     <>
-      <Card className="group relative w-full max-w-full border border-gray-200 bg-white transition-all hover:shadow-md sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl dark:border-gray-700 dark:bg-zinc-900">
+      <Card className="group relative w-full max-w-full min-w-0 border border-gray-200 bg-white transition-all hover:shadow-md sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl dark:border-gray-700 dark:bg-zinc-900">
         <Badge variant="secondary" className="absolute top-2.5 right-2 z-10">
           {space}
         </Badge>
