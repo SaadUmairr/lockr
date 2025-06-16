@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { DeleteCredential, GetCredentials } from "@/actions/user"
 import { useData } from "@/context/data.context"
 import { useKey } from "@/context/key.context"
@@ -32,11 +32,12 @@ export function Main() {
   const {
     pwdFields,
     setPwdFields,
+    allDecrypted,
+    setAllDecrypted,
     selectedSpace,
     sortAlphabatically,
     sortByCreation,
   } = useData()
-  const [allDecrypted, setAllDecrypted] = useState<PasswordDataProp[]>([])
 
   useEffect(() => {
     if (!key || !googleID) return

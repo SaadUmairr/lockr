@@ -80,7 +80,13 @@ const passwordLengths = [16, 32, 48, 64, 80, 96, 112, 128]
 export function CredInput() {
   const { key } = useKey()
   const { googleID } = useUser()
-  const { space, selectedSpace, setSelectedSpace, setPwdFields } = useData()
+  const {
+    space,
+    selectedSpace,
+    setSelectedSpace,
+    setPwdFields,
+    setAllDecrypted,
+  } = useData()
 
   const [loading, setLoading] = useState<boolean>(false)
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
@@ -155,6 +161,9 @@ export function CredInput() {
         password: encryptedResult.encrypted_password,
         iv: encryptedResult.iv,
       })
+
+      console.log("DB RESPONSE: ", dbResponse)
+
       // Updating UI
       setPwdFields((prev) => [
         ...prev,
@@ -169,6 +178,21 @@ export function CredInput() {
           updatedAt: new Date(),
         },
       ])
+
+      setAllDecrypted((prev) => [
+        ...prev,
+        {
+          id: dbResponse.id,
+          username: values.username,
+          password: values.password,
+          space: selectedSpace,
+          website: values.website ?? undefined,
+          iv: dbResponse.iv,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+
       await appendLocalPassword({
         id: dbResponse.id,
         space: dbResponse.space,
@@ -187,6 +211,7 @@ export function CredInput() {
       toast.error(`OOPS SOMETHING WENT WRONG`, { id: submitToast })
     } finally {
       setLoading(false)
+      setShowStrengthSlider(false)
     }
   }
 

@@ -55,7 +55,7 @@ const Footer: React.FC = () => {
           <div className="mb-4 flex space-x-6 md:mb-0">
             <FooterLink href="/#features">Features</FooterLink>
             <FooterLink href="/privacy">Privacy</FooterLink>
-            <FooterLink href="/tos">Terms of Service</FooterLink>
+            {/* <FooterLink href="/tos">Terms of Service</FooterLink> */}
           </div>
 
           <div className="flex space-x-4">
