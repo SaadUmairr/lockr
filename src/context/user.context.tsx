@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react"
-import { useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
 import { getCurrentUserSession, getPassphraseStatus } from "@/actions/user"
 import { loadPassphrase } from "@/utils/idb.util"
 import { toast } from "sonner"
@@ -35,8 +35,6 @@ export function UserContextProvider({
   const [avatar, setAvatar] = useState<string>("")
   const [passphrase_ctx, setPassphrase_ctx] = useState<string>("")
 
-  const router = useRouter()
-
   useEffect(() => {
     ;(async () => {
       try {
@@ -55,27 +53,28 @@ export function UserContextProvider({
 
   useEffect(() => {
     ;(async () => {
-      const storedPass = await loadPassphrase()
-      if (storedPass) {
-        setPassphrase_ctx(storedPass)
+      const passLocal = await loadPassphrase()
+      if (passLocal) {
+        setPassphrase_ctx(passLocal)
         return
       }
       try {
         const passExists = await getPassphraseStatus(googleID)
-        if (!passExists) router.replace("/passphrase?mode=setup")
+        console.log("Pass Exists: ", passExists)
+        if (!passExists) redirect("/passphrase?mode=setup")
         else {
           const retryStored = await loadPassphrase()
           if (retryStored) {
             setPassphrase_ctx(retryStored)
           } else {
-            router.replace("/passphrase?mode=enter")
+            redirect("/passphrase?mode=enter")
           }
         }
       } catch {
         toast.error("Passphrase Check Failed")
       }
     })()
-  }, [googleID, router])
+  }, [googleID])
 
   return (
     <UserContext.Provider

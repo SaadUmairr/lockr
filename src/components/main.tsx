@@ -78,7 +78,7 @@ export function Main() {
     setPwdFields(allDecrypted)
     if (selectedSpace !== "all")
       setPwdFields((prev) => prev.filter((r) => r.space === selectedSpace))
-  }, [selectedSpace])
+  }, [selectedSpace, allDecrypted])
 
   useEffect(() => {
     let sorted = [...allDecrypted]
@@ -102,7 +102,13 @@ export function Main() {
     }
 
     setPwdFields(sorted)
-  }, [sortAlphabatically, sortByCreation, allDecrypted, selectedSpace])
+  }, [
+    sortAlphabatically,
+    sortByCreation,
+    allDecrypted,
+    selectedSpace,
+    setPwdFields,
+  ])
 
   async function handleEdit(id: string) {
     toast(`WORK IN PROGRESS: ${id[0]}`)
@@ -115,6 +121,7 @@ export function Main() {
       await DeleteCredential(id)
       await deleteLocalPassword(id)
       setPwdFields((prev) => prev.filter((r) => r.id !== id))
+      setAllDecrypted((prev) => prev.filter((r) => r.id !== id))
       toast.success("Deleted ", { id: deleteToast })
     } catch (error) {
       toast.error(`FAILED TO DELETE: ${(error as Error).message}`, {
