@@ -10,7 +10,15 @@ import { appendLocalPassword } from "@/utils/idb.util"
 import { generateStrongPassword } from "@/utils/password.util"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AnimatePresence, motion } from "framer-motion"
-import { Eye, EyeOff, Plus, WandSparklesIcon, X } from "lucide-react"
+import {
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Plus,
+  Shield,
+  WandSparklesIcon,
+  X,
+} from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -72,7 +80,19 @@ const formSchema = z.object({
     }),
 })
 
+// Relaxed schema for bypass mode
+const bypassFormSchema = z.object({
+  website: z.string().optional().or(z.literal("")),
+  username: z.string().min(1, {
+    message: "Username is required",
+  }),
+  password: z.string().min(1, {
+    message: "Password is required",
+  }),
+})
+
 type FormData = z.infer<typeof formSchema>
+type BypassFormData = z.infer<typeof bypassFormSchema>
 
 // Password length options
 const passwordLengths = [16, 32, 48, 64, 80, 96, 112, 128]
@@ -93,9 +113,10 @@ export function CredInput() {
   const [inputDialogOen, setInputDialogOpen] = useState<boolean>(false)
   const [passwordLength, setPasswordLength] = useState<number>(24)
   const [showStrengthSlider, setShowStrengthSlider] = useState<boolean>(false)
+  const [bypassMode, setBypassMode] = useState<boolean>(false)
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(bypassMode ? bypassFormSchema : formSchema),
     defaultValues: {
       website: "",
       username: "",
@@ -103,12 +124,42 @@ export function CredInput() {
     },
   })
 
-  const onSubmit = async (values: FormData): Promise<void> => {
+  // Function to check if current password meets security requirements
+  const checkPasswordStrength = (password: string) => {
+    const minLength = password.length >= 6
+    const hasUpper = /[A-Z]/.test(password)
+    const hasLower = /[a-z]/.test(password)
+    const hasNumber = /\d/.test(password)
+    const hasSpecial = /[\W_]/.test(password)
+
+    return {
+      minLength,
+      hasUpper,
+      hasLower,
+      hasNumber,
+      hasSpecial,
+      isStrong: minLength && hasUpper && hasLower && hasNumber && hasSpecial,
+    }
+  }
+
+  const onSubmit = async (values: FormData | BypassFormData): Promise<void> => {
     if (loading) return
     if (!key) {
       toast.error("Encryption key is missing")
       return
     }
+
+    // Show warning if bypassing validation
+    if (bypassMode) {
+      const strength = checkPasswordStrength(values.password)
+      if (!strength.isStrong) {
+        toast.warning("Saving password with reduced security requirements", {
+          description: "Consider updating this password when possible",
+          duration: 3000,
+        })
+      }
+    }
+
     setLoading(true)
     const submitToast = toast.loading("Saving...")
     try {
@@ -206,6 +257,7 @@ export function CredInput() {
 
       form.reset()
       setInputDialogOpen(false)
+      setBypassMode(false) // Reset bypass mode
       toast.success("Credentials Saved", { id: submitToast })
     } catch {
       toast.error(`OOPS SOMETHING WENT WRONG`, { id: submitToast })
@@ -228,7 +280,7 @@ export function CredInput() {
     const password = generateStrongPassword(passwordLength)
     form.setValue("password", password)
     setPasswordVisible(true)
-  }, [passwordLength, form, passwordLength])
+  }, [passwordLength, form])
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible)
@@ -237,6 +289,18 @@ export function CredInput() {
   const toggleStrengthSlider = () => {
     setShowStrengthSlider(!showStrengthSlider)
   }
+
+  const toggleBypassMode = () => {
+    setBypassMode(!bypassMode)
+    // Re-validate form with new schema
+    form.trigger()
+  }
+
+  // Get current password strength for display
+  const currentPassword = form.watch("password")
+  const passwordStrength = currentPassword
+    ? checkPasswordStrength(currentPassword)
+    : null
 
   return (
     <>
@@ -255,11 +319,92 @@ export function CredInput() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <DialogHeader>
-                <DialogTitle>Add a New Credential</DialogTitle>
+                <DialogTitle className="flex items-center gap-2">
+                  Add a New Credential
+                  {bypassMode && (
+                    <span className="flex items-center gap-1 rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-700 dark:bg-orange-900 dark:text-orange-300">
+                      <AlertTriangle className="h-3 w-3" />
+                      Bypass Mode
+                    </span>
+                  )}
+                </DialogTitle>
                 <DialogDescription>
-                  Enter your login details to securely store them.
+                  {bypassMode
+                    ? "Bypass mode allows saving passwords with relaxed security requirements. Use for legacy or system passwords you cannot change."
+                    : "Enter your login details to securely store them."}
                 </DialogDescription>
               </DialogHeader>
+
+              {/* Bypass Mode Toggle */}
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="text-muted-foreground h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {bypassMode ? "Relaxed Validation" : "Strong Validation"}
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant={bypassMode ? "destructive" : "outline"}
+                  size="sm"
+                  onClick={toggleBypassMode}
+                  className="text-xs"
+                >
+                  {bypassMode ? "DISABLE BYPASS" : "ALLOW BYPASS"}
+                </Button>
+              </div>
+
+              {/* Show password strength indicator when not in bypass mode */}
+              {!bypassMode && passwordStrength && currentPassword && (
+                <div className="bg-muted/50 rounded-lg border p-3">
+                  <div className="mb-2 text-sm font-medium">
+                    Password Requirements:
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div
+                      className={`flex items-center gap-1 ${passwordStrength.minLength ? "text-green-600" : "text-red-600"}`}
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full ${passwordStrength.minLength ? "bg-green-600" : "bg-red-600"}`}
+                      />
+                      6+ characters
+                    </div>
+                    <div
+                      className={`flex items-center gap-1 ${passwordStrength.hasUpper ? "text-green-600" : "text-red-600"}`}
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full ${passwordStrength.hasUpper ? "bg-green-600" : "bg-red-600"}`}
+                      />
+                      Uppercase
+                    </div>
+                    <div
+                      className={`flex items-center gap-1 ${passwordStrength.hasLower ? "text-green-600" : "text-red-600"}`}
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full ${passwordStrength.hasLower ? "bg-green-600" : "bg-red-600"}`}
+                      />
+                      Lowercase
+                    </div>
+                    <div
+                      className={`flex items-center gap-1 ${passwordStrength.hasNumber ? "text-green-600" : "text-red-600"}`}
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full ${passwordStrength.hasNumber ? "bg-green-600" : "bg-red-600"}`}
+                      />
+                      Number
+                    </div>
+                    <div
+                      className={`flex items-center gap-1 ${passwordStrength.hasSpecial ? "text-green-600" : "text-red-600"}`}
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full ${passwordStrength.hasSpecial ? "bg-green-600" : "bg-red-600"}`}
+                      />
+                      Special char
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* 1st input field */}
               <FormField
                 control={form.control}
@@ -289,7 +434,6 @@ export function CredInput() {
                     <FormControl>
                       <Input placeholder="your username" {...field} />
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -464,14 +608,17 @@ export function CredInput() {
                   <Button
                     type="button"
                     variant="secondary"
-                    onClick={() => setInputDialogOpen(false)}
+                    onClick={() => {
+                      setInputDialogOpen(false)
+                      setBypassMode(false)
+                    }}
                     disabled={loading}
                   >
                     Close
                   </Button>
                 </DialogClose>
                 <Button type="submit" disabled={loading}>
-                  Save
+                  {bypassMode ? "Save (Bypassed)" : "Save"}
                 </Button>
               </DialogFooter>
             </form>
