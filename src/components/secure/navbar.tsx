@@ -81,6 +81,7 @@ export function Navbar() {
     setSortAlphabatically,
     sortByCreation,
     setSortByCreation,
+    setSearchQuery,
   } = useData()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
@@ -132,33 +133,39 @@ export function Navbar() {
         </Link>
       </div>
 
-      <div className="mx-4 hidden max-w-md flex-1 sm:block">
-        <Select value={selectedSpace} onValueChange={setSelectedSpace}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select space" />
-          </SelectTrigger>
-          <SelectContent className="dark:border-gray-700 dark:bg-gray-800">
-            <SelectGroup>
-              <SelectItem value="all">All</SelectItem>
+      <div className="mx-4 hidden max-w-md flex-1 shrink-0 sm:block">
+        <div className="flex gap-4">
+          <Select value={selectedSpace} onValueChange={setSelectedSpace}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select space" />
+            </SelectTrigger>
+            <SelectContent className="dark:border-gray-700 dark:bg-gray-800">
+              <SelectGroup>
+                <SelectItem value="all">All</SelectItem>
 
-              {space.map((items, index) => (
-                <SelectItem value={items} key={index}>
-                  {items}
-                </SelectItem>
-              ))}
-              <Separator className="my-1 dark:bg-gray-700" />
+                {space.map((items, index) => (
+                  <SelectItem value={items} key={index}>
+                    {items}
+                  </SelectItem>
+                ))}
+                <Separator className="my-1 dark:bg-gray-700" />
 
-              <Button
-                variant="ghost"
-                className="flex w-full items-center justify-start gap-2"
-                onClick={() => setDialogOpen(true)}
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>New Space</span>
-              </Button>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+                <Button
+                  variant="ghost"
+                  className="flex w-full items-center justify-start gap-2"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>New Space</span>
+                </Button>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Input
+            placeholder="Search Passwords"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -196,9 +203,8 @@ export function Navbar() {
             </PopoverContent>
           </Popover>
         )}
-
-        <div className="ml-2">
-          <ThemeToggler />
+        <div className="mx-auto hidden lg:flex">
+          <ThemeToggler className="w-full" />
         </div>
 
         {!isMobile && (
@@ -241,7 +247,6 @@ export function Navbar() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-
                 <Button
                   variant="outline"
                   className="mb-2 w-full justify-start"
@@ -252,7 +257,18 @@ export function Navbar() {
                 </Button>
 
                 <Separator className="my-2 dark:bg-gray-700" />
+                <div className="">
+                  <ThemeToggler className="w-full rounded-sm" />
+                </div>
+                <Separator className="my-2 dark:bg-gray-700" />
 
+                <div className="">
+                  <Input
+                    placeholder="Search Passwords"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Separator className="my-2 dark:bg-gray-700" />
                 <div className="mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Sort
                 </div>
@@ -268,7 +284,7 @@ export function Navbar() {
                 </Button>
               </div>
               <Button
-                className="mx-2 w-full justify-start"
+                className="mx-2 w-full justify-start text-red-500"
                 variant="ghost"
                 onClick={async () => {
                   await LogoutHandler()

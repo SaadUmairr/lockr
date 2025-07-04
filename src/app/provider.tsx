@@ -12,7 +12,7 @@ export function Providers({
 }>) {
   return (
     <>
-      <Toaster />
+      <Toaster position="bottom-center" />
       <NextTopLoader showSpinner={false} />
       <ThemeProvider
         attribute="class"

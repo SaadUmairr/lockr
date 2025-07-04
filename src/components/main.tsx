@@ -35,6 +35,7 @@ export function Main() {
     allDecrypted,
     setAllDecrypted,
     selectedSpace,
+    searchQuery,
     sortAlphabatically,
     sortByCreation,
   } = useData()
@@ -81,33 +82,45 @@ export function Main() {
   }, [selectedSpace, allDecrypted])
 
   useEffect(() => {
-    let sorted = [...allDecrypted]
+    let filteredData = [...allDecrypted]
 
+    // Space Filter
+    if (selectedSpace !== "all") {
+      filteredData = filteredData.filter((pwd) => pwd.space === selectedSpace)
+    }
+
+    // Search Filter
+    if (searchQuery.trim() !== "") {
+      filteredData = filteredData.filter(
+        (pwd) =>
+          (pwd.website?.toLowerCase() || "").includes(
+            searchQuery.toLowerCase()
+          ) || pwd.username.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // Sorting
     if (sortAlphabatically) {
-      sorted.sort(
+      filteredData.sort(
         (a, b) =>
           a.website
             ?.toLowerCase()
             .localeCompare(b.website?.toLowerCase() || "") || 0
       )
     } else if (sortByCreation) {
-      sorted.sort(
+      filteredData.sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
     }
 
-    if (selectedSpace !== "all") {
-      sorted = sorted.filter((r) => r.space === selectedSpace)
-    }
-
-    setPwdFields(sorted)
+    setPwdFields(filteredData)
   }, [
+    searchQuery,
+    selectedSpace,
     sortAlphabatically,
     sortByCreation,
     allDecrypted,
-    selectedSpace,
-    setPwdFields,
   ])
 
   async function handleEdit(id: string) {

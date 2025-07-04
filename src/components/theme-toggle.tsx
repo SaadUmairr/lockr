@@ -3,6 +3,7 @@
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
+import { cn } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
@@ -12,7 +13,7 @@ import {
 
 import { Button } from "./ui/button"
 
-export default function ThemeToggler() {
+export default function ThemeToggler({ className }: { className?: string }) {
   const { setTheme, theme } = useTheme()
 
   const toggleTheme = () => {
@@ -31,7 +32,10 @@ export default function ThemeToggler() {
               onClick={toggleTheme}
               variant="outline"
               size="icon"
-              className="rounded-full bg-gray-100 p-2 dark:bg-gray-900"
+              className={cn(
+                "rounded-full bg-gray-100 p-2 dark:bg-gray-900",
+                className
+              )}
             >
               <Moon className="block h-6 w-6 text-black transition-all dark:hidden" />
               <Sun className="hidden h-6 w-6 text-white transition-all dark:block" />

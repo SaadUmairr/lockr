@@ -25,6 +25,8 @@ interface DataContextProp {
   setPwdFields: Dispatch<SetStateAction<PasswordDataProp[]>>
   allDecrypted: PasswordDataProp[]
   setAllDecrypted: Dispatch<SetStateAction<PasswordDataProp[]>>
+  searchQuery: string
+  setSearchQuery: Dispatch<SetStateAction<string>>
   sortByCreation: boolean
   setSortByCreation: Dispatch<SetStateAction<boolean>>
   sortAlphabatically: boolean
@@ -43,6 +45,8 @@ export function DataContextProvider({ children }: { children: ReactNode }) {
 
   const [pwdFields, setPwdFields] = useState<PasswordDataProp[]>([])
   const [allDecrypted, setAllDecrypted] = useState<PasswordDataProp[]>([])
+
+  const [searchQuery, setSearchQuery] = useState<string>("")
 
   useEffect(() => {
     ;(async () => {
@@ -77,6 +81,8 @@ export function DataContextProvider({ children }: { children: ReactNode }) {
         setPwdFields,
         allDecrypted,
         setAllDecrypted,
+        searchQuery,
+        setSearchQuery,
         sortByCreation,
         setSortByCreation,
         sortAlphabatically,
