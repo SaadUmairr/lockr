@@ -1,6 +1,6 @@
 {
   "name": "lockr",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
@@ -40,11 +40,11 @@
     "nextjs-toploader": "^3.8.16",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-hook-form": "^7.59.0",
+    "react-hook-form": "^7.60.0",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "zod": "^3.25.73"
+    "zod": "^3.25.75"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

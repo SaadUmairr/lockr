@@ -66,6 +66,7 @@ export function PasswordCard({
     if (!showPassword) {
       copyToClipboard(password, "Password")
     }
+    setTimeout(() => setShowPassword(false), 5000)
   }
 
   const getInitial = () => {
