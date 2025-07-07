@@ -82,8 +82,8 @@ export function PasswordCard({
         : `https://${website}`
       const url = new URL(prefixedWebsite)
       return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`
-    } catch (e) {
-      console.error("Error creating URL for favicon:", e)
+    } catch {
+      toast.error("Error creating URL for favicon:")
       return null
     }
   }

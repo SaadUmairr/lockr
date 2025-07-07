@@ -1,10 +1,15 @@
 "use client"
 
-import Image from "next/image"
-import { ExternalLink, Eye, Key, Lock, ShieldCheck } from "lucide-react"
+import { IconBrandGithub } from "@tabler/icons-react"
+import {
+  ExternalLink,
+  Eye,
+  Key,
+  Lock,
+  ShieldCheck,
+  ShieldCheckIcon,
+} from "lucide-react"
 import { motion } from "motion/react"
-
-import Github from "../../public/github.svg"
 
 type FeatureCardProps = {
   icon: React.FC<{ size?: number; className?: string }>
@@ -81,13 +86,7 @@ export const Homepage: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Image
-                    src={Github}
-                    alt="Github"
-                    height={18}
-                    width={18}
-                    className="rounded-full bg-black dark:bg-transparent"
-                  />
+                  <IconBrandGithub />
                   <span>View on GitHub</span>
                 </motion.a>
               </div>
@@ -104,7 +103,7 @@ export const Homepage: React.FC = () => {
                   <motion.div
                     className="relative"
                     animate={{
-                      rotate: [0, 5, -5, 0],
+                      scale: [1, 1.03, 1, 1.035],
                     }}
                     transition={{
                       repeat: Infinity,
@@ -114,7 +113,7 @@ export const Homepage: React.FC = () => {
                   >
                     <Lock size={80} className="text-sky-400" />
                     <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-sky-500">
-                      <ShieldCheck size={16} className="text-white" />
+                      <ShieldCheckIcon size={16} className="text-white" />
                     </div>
                   </motion.div>
                 </div>

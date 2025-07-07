@@ -213,7 +213,6 @@ export function CredInput() {
         iv: encryptedResult.iv,
       })
 
-      console.log("DB RESPONSE: ", dbResponse)
 
       // Updating UI
       setPwdFields((prev) => [

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { IconBrandGithub } from "@tabler/icons-react"
 import { Menu, X } from "lucide-react"
 import { motion } from "motion/react"
 
@@ -81,13 +82,7 @@ const Navbar: React.FC = () => {
             <NavLink href="#features">Features</NavLink>
             <NavLink href="/privacy">Privacy</NavLink>
             <NavLink href="https://github.com/saadumairr/lockr" external>
-              <Image
-                src={Github}
-                alt="Github"
-                height={18}
-                width={18}
-                className="rounded-full bg-black dark:bg-transparent"
-              />
+              <IconBrandGithub size={16} />
               <span>GitHub</span>
             </NavLink>
             <Button className="bg-sky-500" onClick={() => redirect("/login")}>

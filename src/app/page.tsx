@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-slate-50">
-      {/* These components will be client-side rendered */}
       <Navbar />
       <Homepage />
       <Footer />

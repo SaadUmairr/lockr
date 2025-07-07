@@ -3,7 +3,7 @@ import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
-import { GoogleClientButton } from "./clt-btn"
+import { GoogleClientButton, GuestClientButton } from "./clt-btn"
 
 export function LoginForm({
   className,
@@ -30,6 +30,9 @@ export function LoginForm({
           </div>
           <div className="grid gap-4">
             <GoogleClientButton />
+          </div>
+          <div className="grid gap-4">
+            <GuestClientButton />
           </div>
         </div>
       </form>

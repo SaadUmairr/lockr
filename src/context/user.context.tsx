@@ -60,7 +60,6 @@ export function UserContextProvider({
       }
       try {
         const passExists = await getPassphraseStatus(googleID)
-        console.log("Pass Exists: ", passExists)
         if (!passExists) redirect("/passphrase?mode=setup")
         else {
           const retryStored = await loadPassphrase()
