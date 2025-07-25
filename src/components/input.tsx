@@ -9,16 +9,16 @@ import { Encryptor } from "@/utils/crypto.util"
 import { appendLocalPassword } from "@/utils/idb.util"
 import { generateStrongPassword } from "@/utils/password.util"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { AnimatePresence, motion } from "framer-motion"
 import {
-  AlertTriangle,
-  Eye,
-  EyeOff,
-  Plus,
-  Shield,
+  AlertTriangleIcon,
+  EyeIcon,
+  EyeOffIcon,
+  PlusIcon,
+  ShieldIcon,
   WandSparklesIcon,
-  X,
+  XIcon,
 } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -213,7 +213,6 @@ export function CredInput() {
         iv: encryptedResult.iv,
       })
 
-
       // Updating UI
       setPwdFields((prev) => [
         ...prev,
@@ -310,7 +309,7 @@ export function CredInput() {
               className="rounded-full bg-amber-600 p-4 text-white shadow-lg hover:bg-amber-400 dark:invert"
               onClick={() => setInputDialogOpen(true)}
             >
-              <Plus className="h-8 w-8" />
+              <PlusIcon className="h-8 w-8" />
             </Button>
           </div>
         </DialogTrigger>
@@ -322,7 +321,7 @@ export function CredInput() {
                   Add a New Credential
                   {bypassMode && (
                     <span className="flex items-center gap-1 rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-700 dark:bg-orange-900 dark:text-orange-300">
-                      <AlertTriangle className="h-3 w-3" />
+                      <AlertTriangleIcon className="h-3 w-3" />
                       Bypass Mode
                     </span>
                   )}
@@ -337,7 +336,7 @@ export function CredInput() {
               {/* Bypass Mode Toggle */}
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-2">
-                  <Shield className="text-muted-foreground h-4 w-4" />
+                  <ShieldIcon className="text-muted-foreground h-4 w-4" />
                   <span className="text-sm font-medium">
                     {bypassMode ? "Relaxed Validation" : "Strong Validation"}
                   </span>
@@ -468,9 +467,9 @@ export function CredInput() {
                               tabIndex={-1}
                             >
                               {passwordVisible ? (
-                                <Eye className="h-4 w-4" />
+                                <EyeIcon className="h-4 w-4" />
                               ) : (
-                                <EyeOff className="h-4 w-4" />
+                                <EyeOffIcon className="h-4 w-4" />
                               )}
                               <span className="sr-only">
                                 Toggle password visibility
@@ -520,7 +519,7 @@ export function CredInput() {
                   >
                     {showStrengthSlider ? (
                       <>
-                        <X className="mr-1 h-4 w-4" />
+                        <XIcon className="mr-1 h-4 w-4" />
                         CLOSE
                       </>
                     ) : (

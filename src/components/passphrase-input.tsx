@@ -7,8 +7,21 @@ import { useUser } from "@/context/user.context"
 import { savePassphraseLocally } from "@/utils/idb.util"
 import { PassphrasePepper } from "@/utils/passphrase.util"
 import bcrypt from "bcryptjs"
-import { AnimatePresence, motion } from "framer-motion"
-import { AlertTriangle, Check, Eye, EyeOff, Lock, Shield } from "lucide-react"
+import {
+  AlertTriangle,
+  AlertTriangleIcon,
+  Check,
+  CheckIcon,
+  Eye,
+  EyeIcon,
+  EyeOff,
+  EyeOffIcon,
+  Lock,
+  LockIcon,
+  Shield,
+  ShieldIcon,
+} from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
@@ -174,7 +187,10 @@ export const PassphraseInput = () => {
                   transition={{ duration: 0.5 }}
                   className="mb-4 flex justify-center"
                 >
-                  <Shield className="text-primary h-12 w-12" color="#0039a6" />
+                  <ShieldIcon
+                    className="text-primary h-12 w-12"
+                    color="#0039a6"
+                  />
                 </motion.div>
                 <DialogTitle className="text-center text-2xl font-bold">
                   Your Privacy Matters
@@ -196,7 +212,7 @@ export const PassphraseInput = () => {
                     variants={itemVariants}
                     className="bg-muted/50 flex items-center gap-3 rounded-lg p-3"
                   >
-                    <Lock className="text-primary h-5 w-5 flex-shrink-0" />
+                    <LockIcon className="text-primary h-5 w-5 flex-shrink-0" />
                     <span>
                       Is processed locally on your device and
                       <b>never leaves</b> your device
@@ -207,7 +223,7 @@ export const PassphraseInput = () => {
                     variants={itemVariants}
                     className="bg-muted/50 flex items-center gap-3 rounded-lg p-3"
                   >
-                    <Check className="h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckIcon className="h-5 w-5 flex-shrink-0 text-green-500" />
                     <span>
                       Is solely used to secure your information within this
                       application
@@ -218,7 +234,7 @@ export const PassphraseInput = () => {
                     variants={itemVariants}
                     className="bg-muted/50 flex items-center gap-3 rounded-lg p-3"
                   >
-                    <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-500" />
+                    <AlertTriangleIcon className="h-5 w-5 flex-shrink-0 text-yellow-500" />
                     <span>
                       <b>Warning:</b> If you forget your passphrase, you will
                       lose access to your data
@@ -289,9 +305,9 @@ export const PassphraseInput = () => {
                       tabIndex={-1}
                     >
                       {passwordVisible ? (
-                        <Eye className="h-4 w-4" />
+                        <EyeIcon className="h-4 w-4" />
                       ) : (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOffIcon className="h-4 w-4" />
                       )}
                       <span className="sr-only">
                         Toggle password visibility
@@ -432,7 +448,7 @@ const RequirementItem = ({ met, text }: { met: boolean; text: string }) => {
           : "bg-muted text-muted-foreground"
       )}
     >
-      {met && <Check className="h-3 w-3 flex-shrink-0" />}
+      {met && <CheckIcon className="h-3 w-3 flex-shrink-0" />}
       <span>{text}</span>
     </motion.div>
   )
