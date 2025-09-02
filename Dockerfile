@@ -1,18 +1,19 @@
 FROM node:24-alpine
 
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-COPY prisma ./
+COPY package.json pnpm-lock.yaml ./
 
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN pnpm build
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD  [ "pnpm", "start" ]

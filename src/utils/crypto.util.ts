@@ -16,10 +16,13 @@ export async function Encryptor(
 
   const inputBuffer = new TextEncoder().encode(input)
 
+  // Converting iv.buffer to a true ArrayBuffer
+  const ivArray = new Uint8Array(iv.buffer.slice(0))
+
   const encryptedBuffer = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
-      iv,
+      iv: ivArray as BufferSource,
     },
     key,
     inputBuffer
@@ -28,7 +31,7 @@ export async function Encryptor(
   const encryptedBase64 = btoa(
     String.fromCharCode(...new Uint8Array(encryptedBuffer))
   )
-  const ivBase64 = btoa(String.fromCharCode(...iv))
+  const ivBase64 = btoa(String.fromCharCode(...ivArray))
 
   return {
     encryptedBase64,

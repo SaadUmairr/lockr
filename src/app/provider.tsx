@@ -1,5 +1,6 @@
 "use client"
 
+import { ReactLenis } from "lenis/react"
 import { ThemeProvider } from "next-themes"
 import NextTopLoader from "nextjs-toploader"
 
@@ -14,6 +15,7 @@ export function Providers({
     <>
       <Toaster position="bottom-center" />
       <NextTopLoader showSpinner={false} />
+      <ReactLenis root />
       <ThemeProvider
         attribute="class"
         defaultTheme="dark"
