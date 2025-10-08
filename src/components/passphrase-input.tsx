@@ -8,17 +8,11 @@ import { savePassphraseLocally } from "@/utils/idb.util"
 import { PassphrasePepper } from "@/utils/passphrase.util"
 import bcrypt from "bcryptjs"
 import {
-  AlertTriangle,
   AlertTriangleIcon,
-  Check,
   CheckIcon,
-  Eye,
   EyeIcon,
-  EyeOff,
   EyeOffIcon,
-  Lock,
   LockIcon,
-  Shield,
   ShieldIcon,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
