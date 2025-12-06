@@ -1,9 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { getUserAESKeyRecord, setPassphraseStatus } from "@/actions/user"
-import { useUser } from "@/context/user.context"
 import { savePassphraseLocally } from "@/utils/idb.util"
 import { PassphrasePepper } from "@/utils/passphrase.util"
 import bcrypt from "bcryptjs"
@@ -22,7 +21,6 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -32,6 +30,13 @@ import { DrawerDescription } from "@/components/ui/drawer"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+interface PassphraseInputProps {
+  googleID: string
+  userName: string
+  userEmail: string
+  mode: "setup" | "enter"
+}
+
 interface ValidationChecks {
   uppercase: boolean
   lowercase: boolean
@@ -40,11 +45,13 @@ interface ValidationChecks {
   minLength: boolean
 }
 
-export const PassphraseInput = () => {
+export const PassphraseInput = ({
+  googleID,
+  userName,
+  userEmail,
+  mode,
+}: PassphraseInputProps) => {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const mode = searchParams.get("mode") // this could be 'setup' or 'enter'
-  const { googleID, setPassphrase_ctx } = useUser()
   const [showEducation, setShowEducation] = useState(mode === "setup")
   const [showPassphraseDialog, setShowPassphraseDialog] = useState(
     mode === "enter"
@@ -52,6 +59,7 @@ export const PassphraseInput = () => {
   const [passphraseState, setPassphraseState] = useState("")
   const [confirmPassphrase, setConfirmPassphrase] = useState("")
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [validationChecks, setValidationChecks] = useState<ValidationChecks>({
     uppercase: false,
     lowercase: false,
@@ -59,6 +67,15 @@ export const PassphraseInput = () => {
     number: false,
     minLength: false,
   })
+
+  // Log for debugging
+  useEffect(() => {
+    console.log("[PassphraseInput] Mounted", {
+      mode,
+      googleID: googleID.substring(0, 8) + "...",
+      userName,
+    })
+  }, [mode, googleID, userName])
 
   // Calculate strength percentage
   const getStrengthPercentage = () => {
@@ -101,42 +118,92 @@ export const PassphraseInput = () => {
 
   // Handle education drawer close
   const handleEducationUnderstand = () => {
+    console.log("[PassphraseInput] Education completed")
     setShowEducation(false)
     setShowPassphraseDialog(true)
   }
 
   // Handle submit
   const handleSubmit = async () => {
-    if (mode === "setup") {
-      setPassphrase_ctx(passphraseState)
-      savePassphraseLocally(passphraseState)
-      setPassphraseStatus(googleID)
-      toast.success("Passphrase set successfully!")
-      router.replace("/main")
-    } else if (mode === "enter") {
-      const userDetails = await getUserAESKeyRecord(googleID)
-      if (!userDetails) {
-        toast.error("USER DETAILS NOT AVAILABLE")
-        return
-      }
+    if (isSubmitting) {
+      console.log("[PassphraseInput] Already submitting, ignoring")
+      return
+    }
 
-      const passphraseWithPepper = await PassphrasePepper(
-        passphraseState,
-        googleID
-      )
-      setPassphrase_ctx(passphraseState)
-      savePassphraseLocally(passphraseState)
-      const isPassphraseCorrect = await bcrypt.compare(
-        passphraseWithPepper,
-        userDetails?.passphrase
-      )
-      if (!isPassphraseCorrect) {
-        toast.error("INCORRECT PASSPRHASE")
-        return
+    console.log("[PassphraseInput] Submitting passphrase", { mode })
+    setIsSubmitting(true)
+
+    try {
+      if (mode === "setup") {
+        console.log("[PassphraseInput] Setup mode: saving passphrase")
+
+        // Save passphrase locally first
+        await savePassphraseLocally(passphraseState)
+        console.log("[PassphraseInput] Passphrase saved to IndexedDB")
+
+        // Update server status
+        await setPassphraseStatus(googleID)
+        console.log("[PassphraseInput] Server status updated")
+
+        toast.success("Passphrase set successfully!")
+
+        // Small delay to ensure storage is complete
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        console.log("[PassphraseInput] Redirecting to /main")
+        router.push("/main")
+      } else if (mode === "enter") {
+        console.log("[PassphraseInput] Enter mode: verifying passphrase")
+
+        // Verify passphrase
+        const userDetails = await getUserAESKeyRecord(googleID)
+
+        if (!userDetails) {
+          console.error("[PassphraseInput] User encryption keys not found")
+          toast.error("User encryption keys not found")
+          return
+        }
+
+        console.log(
+          "[PassphraseInput] User details retrieved, comparing passphrase"
+        )
+
+        const passphraseWithPepper = await PassphrasePepper(
+          passphraseState,
+          googleID
+        )
+
+        const isPassphraseCorrect = await bcrypt.compare(
+          passphraseWithPepper,
+          userDetails.passphrase
+        )
+
+        if (!isPassphraseCorrect) {
+          console.error("[PassphraseInput] Incorrect passphrase")
+          toast.error("Incorrect passphrase")
+          setPassphraseState("")
+          return
+        }
+
+        console.log("[PassphraseInput] Passphrase verified successfully")
+
+        // Save passphrase locally
+        await savePassphraseLocally(passphraseState)
+        console.log("[PassphraseInput] Passphrase saved to IndexedDB")
+
+        toast.success("Passphrase verified!")
+
+        // Small delay to ensure storage is complete
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        console.log("[PassphraseInput] Redirecting to /main")
+        router.push("/main")
       }
-      toast.success("Passphrase accepted!")
-      // TODO: SET A PROPER ROUTE
-      router.replace("/main")
+    } catch (error) {
+      console.error("[PassphraseInput] Error during submit:", error)
+      toast.error(`Failed: ${(error as Error).message}`)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -171,8 +238,12 @@ export const PassphraseInput = () => {
     <div className="container flex h-screen items-center justify-center">
       {/* Education Drawer - Only shown in setup mode */}
       {mode === "setup" && (
-        <Dialog open={showEducation}>
-          <DialogContent className="min-h-[85vh] overflow-y-hidden">
+        <Dialog open={showEducation} onOpenChange={() => {}}>
+          <DialogContent
+            className="min-h-[85vh] overflow-y-hidden"
+            onInteractOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
+          >
             <div className="mx-auto max-w-md px-4 pb-8">
               <DialogHeader className="text-center">
                 <motion.div
@@ -187,11 +258,11 @@ export const PassphraseInput = () => {
                   />
                 </motion.div>
                 <DialogTitle className="text-center text-2xl font-bold">
-                  Your Privacy Matters
+                  Welcome, {userName}!
                 </DialogTitle>
                 <DrawerDescription className="text-muted-foreground mt-4">
-                  We understand the importance of your privacy. The passphrase
-                  you create:
+                  Before we begin, let&apos;s secure your data with a
+                  passphrase.
                 </DrawerDescription>
               </DialogHeader>
 
@@ -206,10 +277,9 @@ export const PassphraseInput = () => {
                     variants={itemVariants}
                     className="bg-muted/50 flex items-center gap-3 rounded-lg p-3"
                   >
-                    <LockIcon className="text-primary h-5 w-5 flex-shrink-0" />
+                    <LockIcon className="text-primary h-5 w-5 shrink-0" />
                     <span>
-                      Is processed locally on your device and
-                      <b>never leaves</b> your device
+                      Your passphrase <b>never leaves</b> your device
                     </span>
                   </motion.li>
 
@@ -217,10 +287,10 @@ export const PassphraseInput = () => {
                     variants={itemVariants}
                     className="bg-muted/50 flex items-center gap-3 rounded-lg p-3"
                   >
-                    <CheckIcon className="h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckIcon className="h-5 w-5 shrink-0 text-green-500" />
                     <span>
-                      Is solely used to secure your information within this
-                      application
+                      All your passwords are encrypted with military-grade
+                      security
                     </span>
                   </motion.li>
 
@@ -228,25 +298,23 @@ export const PassphraseInput = () => {
                     variants={itemVariants}
                     className="bg-muted/50 flex items-center gap-3 rounded-lg p-3"
                   >
-                    <AlertTriangleIcon className="h-5 w-5 flex-shrink-0 text-yellow-500" />
+                    <AlertTriangleIcon className="h-5 w-5 shrink-0 text-yellow-500" />
                     <span>
-                      <b>Warning:</b> If you forget your passphrase, you will
-                      lose access to your data
+                      <b>Important:</b> If you forget your passphrase, your data
+                      cannot be recovered
                     </span>
                   </motion.li>
                 </motion.ul>
               </div>
 
               <DialogFooter className="px-0 pt-2">
-                <DialogClose asChild>
-                  <Button
-                    size="lg"
-                    onClick={handleEducationUnderstand}
-                    className="w-full"
-                  >
-                    I Understand
-                  </Button>
-                </DialogClose>
+                <Button
+                  size="lg"
+                  onClick={handleEducationUnderstand}
+                  className="w-full"
+                >
+                  I Understand, Continue
+                </Button>
               </DialogFooter>
             </div>
           </DialogContent>
@@ -256,14 +324,23 @@ export const PassphraseInput = () => {
       {/* Passphrase Creation/Entry Dialog */}
       <AnimatePresence>
         {showPassphraseDialog && (
-          <Dialog open={showPassphraseDialog}>
-            <DialogContent className="sm:max-w-md">
+          <Dialog open={showPassphraseDialog} onOpenChange={() => {}}>
+            <DialogContent
+              className="sm:max-w-md"
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+            >
               <DialogHeader>
                 <DialogTitle className="text-center text-xl">
                   {mode === "setup"
-                    ? "Create a Secure Passphrase"
-                    : "Enter Your Passphrase"}
+                    ? "Create Your Master Passphrase"
+                    : `Welcome back, ${userName}!`}
                 </DialogTitle>
+                {mode === "enter" && (
+                  <DrawerDescription className="pt-2 text-center">
+                    Enter your passphrase to unlock your passwords
+                  </DrawerDescription>
+                )}
               </DialogHeader>
 
               <motion.div
@@ -275,7 +352,7 @@ export const PassphraseInput = () => {
                 {/* Passphrase Input */}
                 <div className="space-y-2">
                   <Label htmlFor="passphrase" className="text-sm font-medium">
-                    {mode === "setup" ? "Passphrase" : "Enter Passphrase"}
+                    {mode === "setup" ? "Passphrase" : "Master Passphrase"}
                   </Label>
                   <div className="relative">
                     <Input
@@ -283,12 +360,19 @@ export const PassphraseInput = () => {
                       id="passphrase"
                       placeholder={
                         mode === "setup"
-                          ? "Enter your passphrase"
-                          : "Enter your passphrase to continue"
+                          ? "Enter a strong passphrase"
+                          : "Enter your passphrase"
                       }
                       value={passphraseState}
                       onChange={(e) => setPassphraseState(e.target.value)}
                       className="pr-10"
+                      disabled={isSubmitting}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                          handleSubmit()
+                        }
+                      }}
                     />
                     <Button
                       variant="ghost"
@@ -303,9 +387,7 @@ export const PassphraseInput = () => {
                       ) : (
                         <EyeOffIcon className="h-4 w-4" />
                       )}
-                      <span className="sr-only">
-                        Toggle password visibility
-                      </span>
+                      <span className="sr-only">Toggle visibility</span>
                     </Button>
                   </div>
                 </div>
@@ -322,28 +404,25 @@ export const PassphraseInput = () => {
                     <Input
                       type="password"
                       id="confirmPassphrase"
-                      placeholder="Confirm your passphrase"
+                      placeholder="Re-enter your passphrase"
                       value={confirmPassphrase}
                       onChange={(e) => setConfirmPassphrase(e.target.value)}
+                      disabled={isSubmitting}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                          handleSubmit()
+                        }
+                      }}
                     />
                     <AnimatePresence>
                       {!passphrasesMatch && confirmPassphrase.length > 0 && (
                         <motion.p
-                          initial={{
-                            opacity: 0,
-                            height: 0,
-                          }}
-                          animate={{
-                            opacity: 1,
-                            height: "auto",
-                          }}
-                          exit={{
-                            opacity: 0,
-                            height: 0,
-                          }}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
                           className="mt-1 text-sm text-red-500"
                         >
-                          Passphrases do not match.
+                          Passphrases do not match
                         </motion.p>
                       )}
                     </AnimatePresence>
@@ -371,9 +450,7 @@ export const PassphraseInput = () => {
                     <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                       <motion.div
                         initial={{ width: "0%" }}
-                        animate={{
-                          width: `${getStrengthPercentage()}%`,
-                        }}
+                        animate={{ width: `${getStrengthPercentage()}%` }}
                         transition={{ duration: 0.5 }}
                         className={cn("h-full", getStrengthColor())}
                       />
@@ -392,11 +469,11 @@ export const PassphraseInput = () => {
                       />
                       <RequirementItem
                         met={validationChecks.uppercase}
-                        text="Uppercase letter"
+                        text="Uppercase"
                       />
                       <RequirementItem
                         met={validationChecks.lowercase}
-                        text="Lowercase letter"
+                        text="Lowercase"
                       />
                       <RequirementItem
                         met={validationChecks.number}
@@ -404,23 +481,25 @@ export const PassphraseInput = () => {
                       />
                       <RequirementItem
                         met={validationChecks.specialChar}
-                        text="Special character"
+                        text="Special char"
                       />
                     </motion.div>
                   </div>
                 )}
               </motion.div>
 
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  className="w-full"
-                  disabled={!isFormValid}
-                  onClick={handleSubmit}
-                >
-                  {mode === "setup" ? "Create Passphrase" : "Continue"}
-                </Button>
-              </DialogClose>
+              <Button
+                type="button"
+                className="w-full"
+                disabled={!isFormValid || isSubmitting}
+                onClick={handleSubmit}
+              >
+                {isSubmitting
+                  ? "Processing..."
+                  : mode === "setup"
+                    ? "Create Passphrase"
+                    : "Unlock"}
+              </Button>
             </DialogContent>
           </Dialog>
         )}
@@ -428,6 +507,7 @@ export const PassphraseInput = () => {
     </div>
   )
 }
+
 const RequirementItem = ({ met, text }: { met: boolean; text: string }) => {
   return (
     <motion.div
@@ -442,7 +522,7 @@ const RequirementItem = ({ met, text }: { met: boolean; text: string }) => {
           : "bg-muted text-muted-foreground"
       )}
     >
-      {met && <CheckIcon className="h-3 w-3 flex-shrink-0" />}
+      {met && <CheckIcon className="h-3 w-3 shrink-0" />}
       <span>{text}</span>
     </motion.div>
   )

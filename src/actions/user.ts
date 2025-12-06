@@ -1,7 +1,8 @@
 "use server"
 
 import { auth, signIn, signOut } from "@/auth"
-import { UserEncryptionKey } from "@prisma/client"
+import { UserEncryptionKey } from "@/generated/prisma/client"
+import { AuthError } from "next-auth"
 
 import { prisma } from "@/lib/db"
 
@@ -21,6 +22,25 @@ export async function SaveUserKeysInDB({
   aesIV,
 }: UserEncryptionKey) {
   try {
+    // Check if keys already exist
+    const existing = await prisma.userEncryptionKey.findUnique({
+      where: { googleID },
+    })
+
+    if (existing) {
+      // Update existing keys
+      const dbResponse = await prisma.userEncryptionKey.update({
+        where: { googleID },
+        data: {
+          passphrase,
+          aesIV,
+          aesKey,
+        },
+      })
+      return dbResponse
+    }
+
+    // Create new keys
     const dbResponse = await prisma.userEncryptionKey.create({
       data: {
         googleID,
@@ -29,15 +49,20 @@ export async function SaveUserKeysInDB({
         aesKey,
       },
     })
-    if (!dbResponse) return null
     return dbResponse
   } catch (error) {
-    throw new Error(`KEYS ARE NOT APPENDED TO DB: ${(error as Error).message}`)
+    console.error("SaveUserKeysInDB error:", error)
+    throw new Error(
+      `Failed to save encryption keys: ${(error as Error).message}`
+    )
   }
 }
 
 export async function getUserAESKeyRecord(googleID: string) {
-  if (!googleID) throw new Error("UNAUTHENTICATED REQUEST")
+  if (!googleID) {
+    throw new Error("Google ID is required")
+  }
+
   try {
     const key = await prisma.userEncryptionKey.findUnique({
       where: { googleID },
@@ -45,37 +70,55 @@ export async function getUserAESKeyRecord(googleID: string) {
 
     return key
   } catch (error) {
-    throw new Error(`ERROR FETCHING RECORD: ${(error as Error).message}`)
+    console.error("getUserAESKeyRecord error:", error)
+    throw new Error(
+      `Failed to fetch encryption keys: ${(error as Error).message}`
+    )
   }
 }
 
 export async function getPassphraseStatus(googleID: string) {
+  if (!googleID) {
+    throw new Error("Google ID is required")
+  }
+
   try {
-    const status = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { googleID },
       select: { isPassphraseSet: true },
     })
 
-    return status?.isPassphraseSet ?? false
+    return user?.isPassphraseSet ?? false
   } catch (error) {
+    console.error("getPassphraseStatus error:", error)
     throw new Error(
-      `FAILED TO GET PASSPHRASE STATUS: ${(error as Error).message}`
+      `Failed to get passphrase status: ${(error as Error).message}`
     )
   }
 }
 
 export async function setPassphraseStatus(googleID: string) {
+  if (!googleID) {
+    throw new Error("Google ID is required")
+  }
+
   try {
     const user = await prisma.user.findUnique({ where: { googleID } })
-    if (!user) return null
-    const updatedPassphraseStatus = await prisma.user.update({
+
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    const updatedUser = await prisma.user.update({
       where: { googleID },
       data: { isPassphraseSet: true },
     })
-    return updatedPassphraseStatus
+
+    return updatedUser
   } catch (error) {
+    console.error("setPassphraseStatus error:", error)
     throw new Error(
-      `PASSPRHASE STATUS NOT UPDATED IN DB: ${(error as Error).message}`
+      `Failed to update passphrase status: ${(error as Error).message}`
     )
   }
 }
@@ -85,7 +128,8 @@ export async function getCurrentUserSession() {
     const session = await auth()
     return session
   } catch (error) {
-    throw new Error((error as Error).message)
+    console.error("getCurrentUserSession error:", error)
+    throw new Error(`Failed to get session: ${(error as Error).message}`)
   }
 }
 
@@ -97,8 +141,14 @@ export async function SaveCredentials({
   password,
   iv,
 }: PasswordEntryCreateInput) {
-  if (!username || !password || !iv)
-    throw new Error("REQUIRED FIELDS ARE MISSING")
+  if (!username || !password || !iv) {
+    throw new Error("Username, password, and IV are required")
+  }
+
+  if (!userId) {
+    throw new Error("User ID is required")
+  }
+
   try {
     const response = await prisma.passwordEntry.create({
       data: {
@@ -112,25 +162,33 @@ export async function SaveCredentials({
     })
     return response
   } catch (error) {
-    throw new Error(`FAIED TO SAVE CRED: ${(error as Error).message}`)
+    console.error("SaveCredentials error:", error)
+    throw new Error(`Failed to save credentials: ${(error as Error).message}`)
   }
 }
 
 export async function GetCredentials(googleID: string) {
-  if (!googleID) throw new Error("UNAUTHENTICATED REQUEST")
+  if (!googleID) {
+    throw new Error("Google ID is required")
+  }
+
   try {
     const records = await prisma.passwordEntry.findMany({
       where: { userId: googleID },
+      orderBy: { createdAt: "desc" },
     })
-    if (!records) return null
     return records
   } catch (error) {
-    throw new Error(`GET CRED FAILED: ${(error as Error).message}`)
+    console.error("GetCredentials error:", error)
+    throw new Error(`Failed to get credentials: ${(error as Error).message}`)
   }
 }
 
 export async function GetSpaces(googleID: string) {
-  if (!googleID) throw new Error("UNAUTHENTICATED REQUEST")
+  if (!googleID) {
+    throw new Error("Google ID is required")
+  }
+
   try {
     const spaces = await prisma.passwordEntry.findMany({
       where: { userId: googleID },
@@ -138,29 +196,59 @@ export async function GetSpaces(googleID: string) {
       select: {
         space: true,
       },
+      orderBy: { space: "asc" },
     })
     return spaces
       .map((entry) => entry.space)
       .filter((space): space is string => Boolean(space))
   } catch (error) {
-    throw new Error(`FAILED TO GET SPACES: ${(error as Error).message}`)
+    console.error("GetSpaces error:", error)
+    throw new Error(`Failed to get spaces: ${(error as Error).message}`)
   }
 }
 
 export async function DeleteCredential(id: string) {
-  if (!id) throw new Error("ID IS REQUIRED")
+  if (!id) {
+    throw new Error("Credential ID is required")
+  }
+
   try {
     const response = await prisma.passwordEntry.delete({ where: { id } })
     return response
   } catch (error) {
-    throw new Error(`FAILED TO DELETE CRED: ${(error as Error).message}`)
+    console.error("DeleteCredential error:", error)
+    throw new Error(`Failed to delete credential: ${(error as Error).message}`)
   }
 }
 
 export async function GoogleLoginHandler() {
+  // try {
   await signIn("google")
+  // } catch (error) {
+  //   console.error("GoogleLoginHandler error:", error)
+  //   console.log({ error });
+  // 	if (error instanceof Error) {
+  // 		const { type, cause } = error as AuthError;
+  // 		switch (type) {
+  // 			case "CredentialsSignin":
+  // 				return "Invalid credentials.";
+  // 			case "CallbackRouteError":
+  // 				return cause?.err?.toString();
+  // 			default:
+  // 				return "Something went wrong.";
+  // 		}
+  // 	}
+
+  //   // throw new Error(`Failed to sign in: ${(error as Error).message}`)
+  // 	throw error;
+  // }
 }
 
 export async function LogoutHandler() {
-  return await signOut({ redirect: false })
+  try {
+    return await signOut({ redirect: false })
+  } catch (error) {
+    console.error("LogoutHandler error:", error)
+    throw new Error(`Failed to sign out: ${(error as Error).message}`)
+  }
 }

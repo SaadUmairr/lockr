@@ -45,3 +45,4 @@ generated/
 
 *.env.*
 !.env.example
+/src/generated/prisma

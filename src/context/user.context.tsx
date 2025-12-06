@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { getCurrentUserSession, getPassphraseStatus } from "@/actions/user"
 import { loadPassphrase } from "@/utils/idb.util"
 import { toast } from "sonner"
@@ -20,6 +20,8 @@ interface UserContextProp {
   avatar: string
   passphrase_ctx: string
   setPassphrase_ctx: Dispatch<SetStateAction<string>>
+  isLoading: boolean
+  isAuthenticated: boolean
 }
 
 const UserContext = createContext<UserContextProp | null>(null)
@@ -30,65 +32,124 @@ export function UserContextProvider({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [googleID, setGoogleID] = useState<string>("")
   const [name, setName] = useState<string>("")
   const [email, setEmail] = useState<string>("")
   const [avatar, setAvatar] = useState<string>("")
   const [passphrase_ctx, setPassphrase_ctx] = useState<string>("")
-  const [isCheckingPassphrase, setIsCheckingPassphrase] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  // Fetch user session
+  // Fetch user session - runs once on mount
   useEffect(() => {
-    ;(async () => {
+    let mounted = true
+
+    const fetchSession = async () => {
       try {
+        setIsLoading(true)
         const session = await getCurrentUserSession()
+
+        if (!mounted) return
+
         if (session?.user) {
           setGoogleID(session.user.googleID || "")
           setName(session.user.name || "")
           setEmail(session.user.email || "")
           setAvatar(session.user.image || "")
-        }
-      } catch (error) {
-        toast.error(`SESSION NOT FETCHED: ${(error as Error).message}`)
-      }
-    })()
-  }, [])
-
-  // Check passphrase status and redirect if needed
-  useEffect(() => {
-    if (!googleID) return
-    ;(async () => {
-      try {
-        setIsCheckingPassphrase(true)
-
-        const passLocal = await loadPassphrase()
-
-        if (passLocal) {
-          setPassphrase_ctx(passLocal)
-          setIsCheckingPassphrase(false)
-          return
-        }
-
-        const passExists = await getPassphraseStatus(googleID)
-
-        if (!passExists) {
-          router.push("/passphrase?mode=setup")
+          setIsAuthenticated(true)
         } else {
-          const retryStored = await loadPassphrase()
-
-          if (retryStored) {
-            setPassphrase_ctx(retryStored)
-          } else {
-            router.push("/passphrase?mode=enter")
+          setIsAuthenticated(false)
+          // Only redirect if not on public pages
+          if (pathname !== "/" && pathname !== "/login") {
+            router.push("/login")
           }
         }
       } catch (error) {
-        toast.error("Passphrase Check Failed")
+        if (!mounted) return
+        console.error("[UserContext] Session fetch error:", error)
+        setIsAuthenticated(false)
+        toast.error("Failed to load session")
+        router.push("/login")
       } finally {
-        setIsCheckingPassphrase(false)
+        if (mounted) {
+          setIsLoading(false)
+        }
       }
-    })()
-  }, [googleID, router])
+    }
+
+    fetchSession()
+
+    return () => {
+      mounted = false
+    }
+  }, [router, pathname])
+
+  // Check passphrase ONLY for protected routes (not on passphrase page itself)
+  useEffect(() => {
+    // Skip if:
+    // - Not authenticated
+    // - Already on passphrase page
+    // - On public pages
+    // - No googleID yet
+    // - Still loading
+    const isPassphrasePage = pathname === "/passphrase"
+    const isPublicPage = pathname === "/" || pathname === "/login"
+
+    if (
+      !isAuthenticated ||
+      !googleID ||
+      isLoading ||
+      isPassphrasePage ||
+      isPublicPage
+    ) {
+      return
+    }
+
+    let mounted = true
+
+    const checkPassphraseForProtectedRoute = async () => {
+      try {
+        // Try to load passphrase from IndexedDB
+        const localPassphrase = await loadPassphrase()
+
+        if (!mounted) return
+
+        if (localPassphrase) {
+          // Found local passphrase - set it in context
+          setPassphrase_ctx(localPassphrase)
+          return
+        }
+
+        // No local passphrase - check if user has set one on server
+        const passphraseExists = await getPassphraseStatus(googleID)
+
+        if (!mounted) return
+
+        if (!passphraseExists) {
+          // Never set up - redirect to setup
+          console.log("[UserContext] No passphrase found, redirecting to setup")
+          router.push("/passphrase?mode=setup")
+        } else {
+          // Exists on server but not local - redirect to enter
+          console.log("[UserContext] Passphrase exists, redirecting to enter")
+          router.push("/passphrase?mode=enter")
+        }
+      } catch (error) {
+        if (!mounted) return
+        console.error("[UserContext] Passphrase check error:", error)
+        toast.error("Failed to verify passphrase")
+        // On error, try setup mode
+        router.push("/passphrase?mode=setup")
+      }
+    }
+
+    checkPassphraseForProtectedRoute()
+
+    return () => {
+      mounted = false
+    }
+  }, [googleID, isAuthenticated, isLoading, router, pathname])
 
   return (
     <UserContext.Provider
@@ -99,6 +160,8 @@ export function UserContextProvider({
         avatar,
         passphrase_ctx,
         setPassphrase_ctx,
+        isLoading,
+        isAuthenticated,
       }}
     >
       {children}

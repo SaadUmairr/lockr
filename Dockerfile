@@ -6,14 +6,15 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN pnpm install --frozen-lockfile
-
+COPY prisma ./
 COPY . .
 
-RUN pnpm build
+RUN pnpm install --frozen-lockfile
+
+RUN pnpm run build
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD  [ "pnpm", "start" ]
+CMD  [ "pnpm", "run", "start" ]
