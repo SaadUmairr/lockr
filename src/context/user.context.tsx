@@ -67,7 +67,6 @@ export function UserContextProvider({
         }
       } catch (error) {
         if (!mounted) return
-        console.error("[UserContext] Session fetch error:", error)
         setIsAuthenticated(false)
         toast.error("Failed to load session")
         router.push("/login")
@@ -128,16 +127,13 @@ export function UserContextProvider({
 
         if (!passphraseExists) {
           // Never set up - redirect to setup
-          console.log("[UserContext] No passphrase found, redirecting to setup")
           router.push("/passphrase?mode=setup")
         } else {
           // Exists on server but not local - redirect to enter
-          console.log("[UserContext] Passphrase exists, redirecting to enter")
           router.push("/passphrase?mode=enter")
         }
       } catch (error) {
         if (!mounted) return
-        console.error("[UserContext] Passphrase check error:", error)
         toast.error("Failed to verify passphrase")
         // On error, try setup mode
         router.push("/passphrase?mode=setup")

@@ -68,15 +68,6 @@ export const PassphraseInput = ({
     minLength: false,
   })
 
-  // Log for debugging
-  useEffect(() => {
-    console.log("[PassphraseInput] Mounted", {
-      mode,
-      googleID: googleID.substring(0, 8) + "...",
-      userName,
-    })
-  }, [mode, googleID, userName])
-
   // Calculate strength percentage
   const getStrengthPercentage = () => {
     const checksCount = Object.values(validationChecks).filter(Boolean).length
@@ -118,7 +109,6 @@ export const PassphraseInput = ({
 
   // Handle education drawer close
   const handleEducationUnderstand = () => {
-    console.log("[PassphraseInput] Education completed")
     setShowEducation(false)
     setShowPassphraseDialog(true)
   }
@@ -126,47 +116,33 @@ export const PassphraseInput = ({
   // Handle submit
   const handleSubmit = async () => {
     if (isSubmitting) {
-      console.log("[PassphraseInput] Already submitting, ignoring")
       return
     }
 
-    console.log("[PassphraseInput] Submitting passphrase", { mode })
     setIsSubmitting(true)
 
     try {
       if (mode === "setup") {
-        console.log("[PassphraseInput] Setup mode: saving passphrase")
-
         // Save passphrase locally first
         await savePassphraseLocally(passphraseState)
-        console.log("[PassphraseInput] Passphrase saved to IndexedDB")
 
         // Update server status
         await setPassphraseStatus(googleID)
-        console.log("[PassphraseInput] Server status updated")
 
         toast.success("Passphrase set successfully!")
 
         // Small delay to ensure storage is complete
         await new Promise((resolve) => setTimeout(resolve, 100))
 
-        console.log("[PassphraseInput] Redirecting to /main")
         router.push("/main")
       } else if (mode === "enter") {
-        console.log("[PassphraseInput] Enter mode: verifying passphrase")
-
         // Verify passphrase
         const userDetails = await getUserAESKeyRecord(googleID)
 
         if (!userDetails) {
-          console.error("[PassphraseInput] User encryption keys not found")
           toast.error("User encryption keys not found")
           return
         }
-
-        console.log(
-          "[PassphraseInput] User details retrieved, comparing passphrase"
-        )
 
         const passphraseWithPepper = await PassphrasePepper(
           passphraseState,
@@ -179,28 +155,21 @@ export const PassphraseInput = ({
         )
 
         if (!isPassphraseCorrect) {
-          console.error("[PassphraseInput] Incorrect passphrase")
           toast.error("Incorrect passphrase")
           setPassphraseState("")
           return
         }
 
-        console.log("[PassphraseInput] Passphrase verified successfully")
-
         // Save passphrase locally
         await savePassphraseLocally(passphraseState)
-        console.log("[PassphraseInput] Passphrase saved to IndexedDB")
-
         toast.success("Passphrase verified!")
 
         // Small delay to ensure storage is complete
         await new Promise((resolve) => setTimeout(resolve, 100))
 
-        console.log("[PassphraseInput] Redirecting to /main")
         router.push("/main")
       }
     } catch (error) {
-      console.error("[PassphraseInput] Error during submit:", error)
       toast.error(`Failed: ${(error as Error).message}`)
     } finally {
       setIsSubmitting(false)
