@@ -1,15 +1,17 @@
 "use client"
 
+import Link from "next/link"
 import { IconBrandGithub } from "@tabler/icons-react"
+import { ExternalLink, Eye, ShieldCheck } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 import {
-  ExternalLink,
-  Eye,
-  Key,
-  Lock,
-  ShieldCheck,
-  ShieldCheckIcon,
-} from "lucide-react"
-import { motion } from "motion/react"
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 type FeatureCardProps = {
   icon: React.FC<{ size?: number; className?: string }>
@@ -24,332 +26,206 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   description,
 }) => {
   return (
-    <motion.div
-      className="rounded-lg border border-slate-200 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800"
-      whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)" }}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-4 flex items-center justify-center">
-        <Icon size={36} className="text-sky-400" />
-      </div>
-      <h3 className="mb-2 text-center text-lg font-semibold text-slate-900 dark:text-slate-100">
-        {title}
-      </h3>
-      <p className="text-center text-slate-600 dark:text-slate-300">
-        {description}
-      </p>
-    </motion.div>
+    <Card className="border-border border shadow-sm">
+      <CardHeader className="flex items-center justify-center pb-4">
+        <Icon size={36} className="text-primary" />
+      </CardHeader>
+      <CardContent className="text-center">
+        <CardTitle className="text-foreground mb-2 text-lg font-bold">
+          {title}
+        </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          {description}
+        </CardDescription>
+      </CardContent>
+    </Card>
   )
 }
 
 // Main Homepage Component
 export const Homepage: React.FC = () => {
   return (
-    <main className="grow bg-slate-50 dark:bg-slate-950">
+    <main className="bg-background min-h-screen">
       {/* Hero */}
       <section className="px-4 py-20">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col items-center justify-between md:flex-row">
-            <motion.div
-              className="mb-10 md:mb-0 md:w-1/2"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
+        <div className="container mx-auto max-w-4xl text-center">
+          <h1 className="text-foreground mb-6 text-5xl font-black tracking-tight md:text-7xl">
+            Secure your Credentials with &nbsp;
+            <span className="text-sky-500 dark:text-sky-400">
+              Zero Knowledge
+            </span>
+          </h1>
+          <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
+            Privacy meets simplicity. An open-source password manager that
+            encrypts your data locally with end-to-end encryption. Your master
+            passphrase never leaves your device.
+          </p>
+          <div className="flex flex-col justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+            <Button
+              asChild
+              size="lg"
+              className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
             >
-              <h1 className="mb-4 text-4xl font-bold text-slate-900 md:text-5xl dark:text-slate-50">
-                Secure your Credentials with &nbsp;
-                <span className="text-sky-400">zero knowledge</span>
-              </h1>
-              <p className="mb-4 text-xl font-light text-slate-700 md:text-2xl dark:text-slate-300">
-                Where privacy meets simplicity.
-              </p>
-              <p className="text-md mb-8 text-slate-600 dark:text-slate-400">
-                An open-source password manager that encrypts your data locally
-                with end-to-end encryption. Your master passphrase never leaves
-                your device.
-              </p>
-              <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-                <motion.a
-                  href="/login"
-                  className="rounded-lg bg-sky-700 px-6 py-3 text-center font-medium text-white transition duration-300 hover:bg-sky-500"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Get Started
-                </motion.a>
-                <motion.a
-                  href="https://github.com/saadumairr/lockr"
-                  className="flex items-center justify-center space-x-2 rounded-lg border border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition duration-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <IconBrandGithub />
-                  <span>View on GitHub</span>
-                </motion.a>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="md:w-5/12"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.4 }}
+              <Link href="/login">Get Started</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-border text-foreground hover:bg-accent hover:text-foreground w-full sm:w-auto"
             >
-              <div className="rounded-lg border border-slate-300 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-800">
-                <div className="mb-8 flex justify-center">
-                  <motion.div
-                    className="relative"
-                    animate={{
-                      scale: [1, 1.03, 1, 1.035],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      duration: 4,
-                    }}
-                  >
-                    <Lock size={80} className="text-sky-400" />
-                    <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-sky-500">
-                      <ShieldCheckIcon size={16} className="text-white" />
-                    </div>
-                  </motion.div>
-                </div>
-                <motion.div
-                  className="space-y-4"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    show: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.3,
-                      },
-                    },
-                  }}
-                  initial="hidden"
-                  animate="show"
-                >
-                  <motion.div
-                    className="rounded-md bg-slate-200 p-4 dark:bg-slate-700 dark:text-slate-700"
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      show: { opacity: 1, y: 0 },
-                    }}
-                  >
-                    <div className="mb-2 flex justify-between">
-                      <span className="text-slate-700 dark:text-slate-300">
-                        Example Service
-                      </span>
-                      <Eye
-                        size={18}
-                        className="text-slate-600 dark:text-slate-400"
-                      />
-                    </div>
-                    <div className="rounded-md bg-slate-300 p-2 font-mono text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                      ••••••••••••••••
-                    </div>
-                  </motion.div>
-                  <motion.div
-                    className="rounded-md bg-slate-200 p-4 dark:bg-slate-700"
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      show: { opacity: 1, y: 0 },
-                    }}
-                  >
-                    <div className="mb-2 flex justify-between">
-                      <span className="text-slate-700 dark:text-slate-300">
-                        Your Master Key
-                      </span>
-                      <Key size={18} className="text-sky-400" />
-                    </div>
-                    <div className="rounded-md bg-slate-300 p-2 font-mono text-sky-400 dark:bg-slate-800">
-                      Only you know this
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </div>
-            </motion.div>
+              <Link
+                href="https://github.com/saadumairr/lockr"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on GitHub
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="bg-white px-4 py-16 dark:bg-slate-900">
+      <section id="features" className="py-20">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            className="mb-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2
-              className={
-                "mb-4 text-3xl font-bold text-slate-900 dark:text-slate-100"
-              }
-            >
+          <div className="mb-12 text-center">
+            <h2 className="text-foreground mb-4 text-4xl font-black">
               Security by Design
             </h2>
-            <p
-              className={"mx-auto max-w-2xl text-slate-600 dark:text-slate-400"}
-            >
-              lockr was built from the ground up with your privacy in mind. We
-              believe security shouldn&apos;t come at the cost of convenience.
+            <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+              lockr is built for your privacy. Security without compromise.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <FeatureCard
               icon={ShieldCheck}
               title="End-to-End Encryption"
-              description="All your sensitive data is encrypted locally on your device before it reaches our servers."
+              description="Your data is encrypted on your device before it ever touches the servers."
             />
             <FeatureCard
               icon={Eye}
-              title="Zero Knowledge Architecture"
-              description="We can't see your passwords. Your master key never leaves your device, so only you can decrypt your data."
+              title="Zero Knowledge"
+              description="We see nothing. Your master key stays local, only you decrypt your vault."
             />
             <FeatureCard
-              icon={ExternalLink}
-              title="Open Source Transparency"
-              description="Our code is fully transparent. Anyone can verify our security practices and contribute improvements."
+              icon={IconBrandGithub}
+              title="Open Source"
+              description="Full transparency. Audit the code. Contribute if you dare."
             />
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="bg-slate-100 px-4 py-16 dark:bg-slate-950">
+      <section className="bg-muted py-20">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            className="mb-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="mb-4 text-3xl font-bold text-slate-900 dark:text-slate-100">
+          <div className="mb-12 text-center">
+            <h2 className="text-foreground mb-4 text-4xl font-black">
               How lockr Works
             </h2>
-            <p className="mx-auto max-w-2xl text-slate-600 dark:text-slate-400">
-              Simple for you, complex for attackers.
+            <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+              Simple steps. Ironclad protection.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <motion.div
-              className="rounded-lg border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
-                  <span className="font-bold text-sky-400">1</span>
+            <Card className="border-border border shadow-sm">
+              <CardHeader className="flex items-center justify-center pb-4">
+                <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
+                  <span className="text-primary-foreground text-lg font-bold">
+                    1
+                  </span>
                 </div>
-              </div>
-              <h3 className="mb-2 text-center text-lg font-medium text-slate-900 dark:text-slate-100">
-                Create Master Key
-              </h3>
-              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-                Set up your personal passphrase that will be used to encrypt all
-                your data.
-              </p>
-            </motion.div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-foreground mb-2 text-lg font-bold">
+                  Create Master Key
+                </CardTitle>
+                <CardDescription className="text-muted-foreground text-sm">
+                  Set a passphrase. It guards everything.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            <motion.div
-              className="rounded-lg border border-slate-300 bg-white p-4 dark:border-slate-300 dark:bg-slate-800"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
-                  <span className="font-bold text-sky-400">2</span>
+            <Card className="border-border border shadow-sm">
+              <CardHeader className="flex items-center justify-center pb-4">
+                <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
+                  <span className="text-primary-foreground text-lg font-bold">
+                    2
+                  </span>
                 </div>
-              </div>
-              <h3 className="mb-2 text-center text-lg font-medium text-slate-900 dark:text-slate-100">
-                Add Passwords
-              </h3>
-              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-                Store your login credentials securely with end-to-end
-                encryption.
-              </p>
-            </motion.div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-foreground mb-2 text-lg font-bold">
+                  Add Passwords
+                </CardTitle>
+                <CardDescription className="text-muted-foreground text-sm">
+                  Store credentials. Locked tight.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            <motion.div
-              className="rounded-lg border bg-white p-4 dark:border-slate-800 dark:bg-slate-800"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
-                  <span className="font-bold text-sky-400">3</span>
+            <Card className="border-border border shadow-sm">
+              <CardHeader className="flex items-center justify-center pb-4">
+                <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
+                  <span className="text-primary-foreground text-lg font-bold">
+                    3
+                  </span>
                 </div>
-              </div>
-              <h3 className="mb-2 text-center text-lg font-medium text-slate-900 dark:text-slate-100">
-                Local Encryption
-              </h3>
-              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-                Everything is encrypted on your device before being stored.
-              </p>
-            </motion.div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-foreground mb-2 text-lg font-bold">
+                  Local Encryption
+                </CardTitle>
+                <CardDescription className="text-muted-foreground text-sm">
+                  Encrypt locally. We never see it.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            <motion.div
-              className="rounded-lg border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
-                  <span className="font-bold text-sky-400">4</span>
+            <Card className="border-border border shadow-sm">
+              <CardHeader className="flex items-center justify-center pb-4">
+                <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
+                  <span className="text-primary-foreground text-lg font-bold">
+                    4
+                  </span>
                 </div>
-              </div>
-              <h3 className="mb-2 text-center text-lg font-medium text-slate-900 dark:text-slate-100">
-                Access Anywhere
-              </h3>
-              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-                Securely access your passwords across all your devices.
-              </p>
-            </motion.div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-foreground mb-2 text-lg font-bold">
+                  Access Anywhere
+                </CardTitle>
+                <CardDescription className="text-muted-foreground text-sm">
+                  Sync securely. Own it everywhere.
+                </CardDescription>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-b from-slate-100 to-white px-4 py-16 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950">
+      <section className="from-background to-muted bg-linear-to-b py-20">
         <div className="container mx-auto max-w-4xl">
-          <motion.div
-            className="rounded-xl border border-slate-300 bg-white p-8 text-center shadow-xl dark:border-slate-700 dark:bg-slate-800"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="mb-4 text-2xl font-bold text-slate-900 md:text-3xl dark:text-slate-100">
-              Ready to secure your Credentials?
-            </h2>
-            <p className="mb-8 text-slate-700 dark:text-slate-300">
-              It takes less than a minute to start protecting your passwords
-              with lockr.
-            </p>
-            <motion.a
-              href="/login"
-              className="inline-block rounded-lg bg-sky-700 px-8 py-3 text-center font-medium text-white transition duration-300 hover:bg-sky-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Secure My Credentials
-            </motion.a>
-          </motion.div>
+          <Card className="bg-card border-0 shadow-xl">
+            <CardContent className="p-12 text-center">
+              <h2 className="text-foreground mb-6 text-5xl font-black">
+                LOCK DOWN YOUR CREDENTIALS
+              </h2>
+              <p className="text-muted-foreground mb-8 text-xl">
+                Unbreakable security. Start in seconds.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 text-lg font-bold"
+              >
+                <Link href="/login">SECURE NOW</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>

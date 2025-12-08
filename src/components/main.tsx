@@ -1,17 +1,12 @@
 "use client"
 
-import { useEffect } from "react"
-import { DeleteCredential, GetCredentials } from "@/actions/user"
+import { useEffect, useMemo } from "react"
+import { GetCredentials } from "@/actions/user"
 import { useData } from "@/context/data-context"
 import { useKey } from "@/context/key-context"
 import { useUser } from "@/context/user-context"
 import { DecryptCredArray } from "@/utils/crypto-util"
-import {
-  deleteLocalPassword,
-  GetLocalPasswords,
-  SaveLocalPasswords,
-} from "@/utils/idb.util"
-import { toast } from "sonner"
+import { GetLocalPasswords, SaveLocalPasswords } from "@/utils/idb.util"
 
 import { PasswordCard } from "./pwd-card"
 
@@ -117,12 +112,25 @@ export function Main() {
     allDecrypted,
   ])
 
+  const filteredPasswords = useMemo(() => {
+    return pwdFields.filter((item) => {
+      const matchesSpace =
+        selectedSpace === "all" || item.space === selectedSpace
+      const matchesSearch =
+        !searchQuery ||
+        item.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.website?.toLowerCase().includes(searchQuery.toLowerCase())
+
+      return matchesSpace && matchesSearch
+    })
+  }, [pwdFields, searchQuery, selectedSpace])
+
   return (
     <div className="">
       {(pwdFields.length > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {pwdFields.map((record) => (
-            <PasswordCard key={record.id} data={record} />
+          {filteredPasswords.map((password) => (
+            <PasswordCard key={password.id} data={password} />
           ))}
         </div>
       )) || (
