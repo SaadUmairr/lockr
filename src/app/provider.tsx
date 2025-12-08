@@ -16,13 +16,8 @@ export function Providers({
       <Toaster position="bottom-center" />
       <NextTopLoader showSpinner={false} />
       <ReactLenis root />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <div className="transition-colors duration-300">{children}</div>
       </ThemeProvider>
     </>
   )

@@ -11,7 +11,7 @@ import {
 } from "@/utils/key-ops.util"
 import { hashPassphrase } from "@/utils/passphrase.util"
 
-import { useUser } from "./user.context"
+import { useUser } from "./user-context"
 
 type SymmetricKeyContextType = {
   key: CryptoKey | null

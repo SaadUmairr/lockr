@@ -26,7 +26,7 @@ export function PrivacyPage() {
               <span className="font-bold text-slate-900 dark:text-white">
                 do
               </span>
-              &nbsp; and&nbsp;
+              &nbsp; and &nbsp;
               <span className="font-bold text-slate-900 dark:text-white">
                 don&apos;t
               </span>

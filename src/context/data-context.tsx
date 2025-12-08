@@ -14,7 +14,7 @@ import { loadSpaces, saveSpaces } from "@/utils/idb.util"
 
 import { PasswordDataProp } from "@/components/main"
 
-import { useUser } from "./user.context"
+import { useUser } from "./user-context"
 
 interface DataContextProp {
   space: string[]

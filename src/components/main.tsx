@@ -2,10 +2,10 @@
 
 import { useEffect } from "react"
 import { DeleteCredential, GetCredentials } from "@/actions/user"
-import { useData } from "@/context/data.context"
-import { useKey } from "@/context/key.context"
-import { useUser } from "@/context/user.context"
-import { DecryptCredArray } from "@/utils/crypto.util"
+import { useData } from "@/context/data-context"
+import { useKey } from "@/context/key-context"
+import { useUser } from "@/context/user-context"
+import { DecryptCredArray } from "@/utils/crypto-util"
 import {
   deleteLocalPassword,
   GetLocalPasswords,
@@ -76,12 +76,6 @@ export function Main() {
   }, [key, googleID])
 
   useEffect(() => {
-    setPwdFields(allDecrypted)
-    if (selectedSpace !== "all")
-      setPwdFields((prev) => prev.filter((r) => r.space === selectedSpace))
-  }, [selectedSpace, allDecrypted])
-
-  useEffect(() => {
     let filteredData = [...allDecrypted]
 
     // Space Filter
@@ -123,37 +117,12 @@ export function Main() {
     allDecrypted,
   ])
 
-  async function handleEdit(id: string) {
-    toast(`WORK IN PROGRESS: ${id[0]}`)
-    // TODO: WRITE API TO EDIT
-  }
-
-  async function handleDelete(id: string) {
-    const deleteToast = toast.loading("Deleting...")
-    try {
-      await DeleteCredential(id)
-      await deleteLocalPassword(id)
-      setPwdFields((prev) => prev.filter((r) => r.id !== id))
-      setAllDecrypted((prev) => prev.filter((r) => r.id !== id))
-      toast.success("Deleted ", { id: deleteToast })
-    } catch (error) {
-      toast.error(`FAILED TO DELETE: ${(error as Error).message}`, {
-        id: deleteToast,
-      })
-    }
-  }
-
   return (
     <div className="">
       {(pwdFields.length > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {pwdFields.map((record) => (
-            <PasswordCard
-              key={record.id}
-              {...record}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <PasswordCard key={record.id} data={record} />
           ))}
         </div>
       )) || (
