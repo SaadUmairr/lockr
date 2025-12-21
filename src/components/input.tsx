@@ -92,7 +92,7 @@ export function CredInput() {
   const { key } = useKey()
   const { googleID } = useUser()
   const { space, selectedSpace, setPwdFields, setAllDecrypted } = useData()
-
+  const [spaceForPwd, setSpaceForPwd] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [passwordVisible, setPasswordVisible] = useState(false)
@@ -174,25 +174,31 @@ export function CredInput() {
             values.website ? Encryptor(values.website, key, iv) : null,
           ])
 
+        console.log("SPACE BEFORE SAVE: ", spaceForPwd)
+
         const dbResponse = await SaveCredentials({
           userId: googleID,
-          space: selectedSpace === "all" ? "main" : selectedSpace,
+          space: spaceForPwd || "main",
           website: websiteResult?.encryptedBase64 ?? null,
           username: usernameResult.encryptedBase64,
           password: passwordResult.encryptedBase64,
           iv: usernameResult.ivBase64,
         })
 
+        console.log("DB RESPONSE: ", dbResponse)
+
         const newEntry: PasswordDataProp = {
           id: dbResponse.id,
           username: values.username,
           password: values.password,
-          space: selectedSpace === "all" ? "main" : selectedSpace,
+          space: spaceForPwd || "main",
           website: values.website,
           iv: dbResponse.iv,
           createdAt: dbResponse.createdAt,
           updatedAt: dbResponse.updatedAt,
         }
+
+        console.log("NEW ENTRY: ", newEntry)
 
         setPwdFields((prev) => [newEntry, ...prev])
         setAllDecrypted((prev) => [newEntry, ...prev])
@@ -219,6 +225,7 @@ export function CredInput() {
       bypassMode,
       passwordStrength,
       googleID,
+      spaceForPwd,
       selectedSpace,
       form,
       setPwdFields,
@@ -504,10 +511,11 @@ export function CredInput() {
                 <FormItem>
                   <FormLabel>Space</FormLabel>
                   <Select
-                    value={selectedSpace === "all" ? "main" : selectedSpace}
+                    value={spaceForPwd || "main"}
                     onValueChange={(value) => {
-                      // Handle via context if needed
+                      setSpaceForPwd(value)
                     }}
+                    defaultValue="main"
                     disabled={loading}
                   >
                     <SelectTrigger>

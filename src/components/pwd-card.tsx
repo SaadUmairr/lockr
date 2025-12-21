@@ -56,6 +56,7 @@ import {
 import { Input } from "@/components/ui/input"
 
 import { PasswordDataProp } from "./main"
+import { Badge } from "./ui/badge"
 import {
   InputGroup,
   InputGroupAddon,
@@ -334,6 +335,13 @@ export function PasswordCard({ data }: PasswordCardProps) {
         layout
       >
         <Card className="group relative w-full max-w-full min-w-0 border border-gray-200 bg-white transition-all hover:shadow-md sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl dark:border-gray-700 dark:bg-zinc-900">
+          <Badge
+            variant="secondary"
+            className="absolute top-2.5 right-2 z-10"
+            aria-label={`Space: ${data.space}`}
+          >
+            {data.space}
+          </Badge>
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2.5">

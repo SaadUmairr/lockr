@@ -50,7 +50,7 @@ const Navbar = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent side="right" className="w-75 sm:w-100">
                 <div className="mt-8 flex flex-col space-y-4">
                   <div className="flex items-center gap-x-2">
                     <ThemeToggler />

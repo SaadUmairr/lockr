@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowDownAZIcon,
   ArrowUpDownIcon,
+  CheckIcon,
   Clock,
   LogOutIcon,
   MenuIcon,
@@ -242,7 +243,7 @@ export function Navbar() {
                       <Clock className="h-4 w-4" />
                       <span>Creation Date</span>
                       {currentSort === "creation" && (
-                        <span className="ml-auto text-xs">✓</span>
+                        <CheckIcon className="ml-auto text-xs" size={12} />
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -252,7 +253,7 @@ export function Navbar() {
                       <ArrowDownAZIcon className="h-4 w-4" />
                       <span>Alphabetically</span>
                       {currentSort === "alphabetical" && (
-                        <span className="ml-auto text-xs">✓</span>
+                        <CheckIcon className="ml-auto text-xs" size={12} />
                       )}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -323,7 +324,7 @@ export function Navbar() {
                       <Clock className="mr-2 h-4 w-4" />
                       Creation Date
                       {currentSort === "creation" && (
-                        <span className="ml-auto text-xs">✓</span>
+                        <CheckIcon className="ml-auto text-xs" size={12} />
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -332,7 +333,7 @@ export function Navbar() {
                       <ArrowDownAZIcon className="mr-2 h-4 w-4" />
                       Alphabetically
                       {currentSort === "alphabetical" && (
-                        <span className="ml-auto text-xs">✓</span>
+                        <CheckIcon className="ml-auto text-xs" size={12} />
                       )}
                     </DropdownMenuItem>
 

@@ -6,7 +6,7 @@ import { PassphraseInput } from "@/components/passphrase-input"
 export default async function PassphrasePage({
   searchParams,
 }: {
-  searchParams: { mode?: string }
+  searchParams: Promise<{ mode?: string }>
 }) {
   const session = await auth()
 
@@ -14,7 +14,7 @@ export default async function PassphrasePage({
     redirect("/login")
   }
 
-  const mode = searchParams.mode
+  const mode = (await searchParams).mode
   if (!mode || (mode !== "setup" && mode !== "enter")) {
     redirect("/passphrase?mode=enter")
   }
